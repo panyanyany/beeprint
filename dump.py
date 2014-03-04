@@ -256,3 +256,4 @@ if __name__ == '__main__':
 	dump_obj({'a':1, 'b':2, 'c':[2,3]})
 	dump_obj(t)
 	#file_put_contents('deprint.log', dump_obj(t).encode('gbk'))
+	
