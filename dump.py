@@ -4,13 +4,17 @@ import inspect
 
 outfile = sys.stdout
 encoding = 'utf-8'
-maxDeep = 2
+maxDeep = 5
 leading = u'  '
 newline = False
-write_to_buffer_when_execute = False
+write_to_buffer_when_execute = True
 bufferHandle = sys.stdout
 tuple_in_line = True
 list_in_line = True
+# 过滤以 x 开头的属性
+prop_leading_filters = ["__", "func_"]
+# 根据类型过滤对象的属性
+prop_filters = [types.MethodType]
 
 _AS_ELEMENT_ = 1
 _AS_VALUE_ = 2
@@ -19,12 +23,22 @@ _AS_LIST_ELEMENT_ = _AS_DICT_ELEMENT_ = _AS_TUPLE_ELEMENT_ = _AS_CLASS_ELEMENT_ 
 def object_attr_default_filter(obj, name, val):
     '过滤不需要的对象属性'
 
-    return False
+    for propLeading in prop_leading_filters:
+        if name.startswith(propLeading):
+            return True
 
-    if name.startswith("__") or name.startswith("func_"):
-        return True
-    elif type(val) == types.MethodType:
-        return True
+    for prop in prop_filters:
+        # filter is a type
+        if type(prop) == types.TypeType:
+            if type(val) == prop:
+                return True
+        # filter is a string
+        elif isinstance(prop, basestring) or isinstance(prop, str):
+            if name == prop:
+                return True
+        # filter is callable
+        elif hasattr(prop, '__call__'):
+            return prop(name, val)
 
     return False
 
@@ -268,12 +282,18 @@ def build_class_block(o, leadCnt = 0, position = _AS_ELEMENT_):
     # body
     props = dir(o)
     props_cnt = len(props)
+    filter_count = 0
     for idx, attr in enumerate(props):
         if attr == '__abstractmethods__':
             continue
-        val = getattr(o, attr)
+
+        try:
+            val = getattr(o, attr)
+        except Exception as e:
+            val = "<ERROR: CAN NOT ACCESS ATTRIBUTE. MESSAGE: %s>" % e
         '过滤不需要的属性'
         if object_attr_default_filter(o, attr, val):
+            filter_count += 1
             continue
 
         '最后一个元素不需要再加(,)逗号'
@@ -285,6 +305,7 @@ def build_class_block(o, leadCnt = 0, position = _AS_ELEMENT_):
         #'忽略掉 以__开头的成员、自引用成员、函数成员'
         ret += build_pair_block(attr, val, leadCnt+1, position)
 
+    ret += pstr((leadCnt + 1) * leading) + pstr("<filter %d props>\n" % filter_count)
 
     # }
     #ret += leading*leadCnt + '}' + pstr('\n')
@@ -350,9 +371,10 @@ if __name__ == '__main__':
         #dump_obj('a')
         #dump_obj('哈哈')
         #dump_obj({'a':1, 'b':2, 'c':[2,3]})
-        #dump_obj(t)
+        dump_obj(t)
         dump_obj(typeval)
         open("afdasfa/fasdfasf")
     except Exception as e:
         print e
         #print dump_obj(inspect.trace())
+
