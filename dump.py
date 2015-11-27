@@ -1,13 +1,19 @@
-#-*- coding:utf-8 -*-
-import sys, traceback, types
-import inspect
+# -*- coding:utf-8 -*-
+import sys
+import traceback
+import types
+
+# avoid throw [UnicodeEncodeError: 'ascii' codec can't encode characters]
+# exceptions, without this process, the sys.getdefaultencoding() returns ascii
+reload(sys)
+sys.setdefaultencoding('utf-8')
 
 outfile = sys.stdout
 encoding = 'utf-8'
 maxDeep = 5
 leading = u'  '
 newline = False
-write_to_buffer_when_execute = True
+write_to_buffer_when_execute = False
 bufferHandle = sys.stdout
 tuple_in_line = True
 list_in_line = True
@@ -16,9 +22,21 @@ prop_leading_filters = ["__", "func_"]
 # 根据类型过滤对象的属性
 prop_filters = [types.MethodType]
 
+# >> 优先策略
+# 正确性优先，尽量正确显示出所有字段，有无法解析的字段立即报错并退出
+_PS_CORRECTNESS_FIRST = 1
+# 内容优先，尽量保证输出全文，对于无法解析的字段以预置内容代替
+# 比如：<CAN NOT PARSE OBJECT>
+_PS_CONTENT_FIRST = 2
+priority_strategy = _PS_CONTENT_FIRST
+
 _AS_ELEMENT_ = 1
 _AS_VALUE_ = 2
-_AS_LIST_ELEMENT_ = _AS_DICT_ELEMENT_ = _AS_TUPLE_ELEMENT_ = _AS_CLASS_ELEMENT_ = 4
+_AS_LIST_ELEMENT_ = \
+    _AS_DICT_ELEMENT_ = \
+    _AS_TUPLE_ELEMENT_ = \
+    _AS_CLASS_ELEMENT_ = 4
+
 
 def object_attr_default_filter(obj, name, val):
     '过滤不需要的对象属性'
@@ -55,32 +73,34 @@ def _b(s):
 
 def pstr(s):
     res = u''
-    
+
     if isinstance(s, unicode):
         res += s
     elif isinstance(s, str):
-        try:
-            res += s.decode(encoding)
-        except Exception, e:
-            #print "%s, %s, %s" % (type(s), type(''), encoding)
-            raise e
-            #res += s.decode('gbk')
-
+        res += s.decode(encoding)
     else:
         res += str(s).decode(encoding)
 
     return res
 
-def dump_obj(o, output = True):
-    
+def dump_obj(o, output=True):
+
     res = build_single_block(o, 0)
     if output and not write_to_buffer_when_execute:
         try:
             print res,
         except Exception, e:
             print_exc_plus()
+            if type(e) is UnicodeEncodeError:
+                # UnicodeEncodeError: 'ascii' codec can't encode characters in
+                # position 35-36: ordinal not in range(128)
+                print sys.getdefaultencoding()
+                print 'res value type:', type(res)
+            else:
+                print 'exception type :', type(e)
     else:
         return res
+
 
 def print_exc_plus():
     """
@@ -110,25 +130,24 @@ def print_exc_plus():
             #We have to be careful not to cause a new error in our error
             #printer! Calling str() on an unknown object could cause an
             #error we don't want.
-            try:                   
+            try:
                 print value
             except:
                 print "<ERROR WHILE PRINTING VALUE>"
-        
+
 
 def tail_symbol(position):
-    if (position & _AS_LIST_ELEMENT_ or 
-        position & _AS_DICT_ELEMENT_ or
-        position & _AS_CLASS_ELEMENT_ or
-        position & _AS_TUPLE_ELEMENT_):
+    if (position & _AS_LIST_ELEMENT_ or
+            position & _AS_DICT_ELEMENT_ or
+            position & _AS_CLASS_ELEMENT_ or
+            position & _AS_TUPLE_ELEMENT_):
         tail = ','
     else:
         tail = ''
     return tail
 
 
-
-def build_single_block(obj, leadCnt = 0, position = _AS_ELEMENT_):
+def build_single_block(obj, leadCnt=0, position=_AS_ELEMENT_):
     '遍历对象，判断对象内成员的类型，然后调用对应的 build_*_block() 处理'
     ret = pstr('')
 
@@ -149,28 +168,30 @@ def build_single_block(obj, leadCnt = 0, position = _AS_ELEMENT_):
         ret += build_list_block(obj, leadCnt, position)
     elif isinstance(obj, tuple):
         ret += build_tuple_block(obj, leadCnt, position)
-    elif is_extendable(obj):#hasattr(obj, '__dict__') or isinstance(obj, object):
+    # hasattr(obj, '__dict__') or isinstance(obj, object):
+    elif is_extendable(obj):
         ret += build_class_block(obj, leadCnt, position)
     else:
         ret += _b(leadCnt * leading + typeval(obj) + pstr(tail + '\n'))
 
-
     return ret
+
 
 def is_extendable(obj):
     '判断obj是否可以展开'
     return isinstance(obj, dict) or hasattr(obj, '__dict__') or isinstance(obj, (tuple, list, types.FrameType))
 
-def build_pair_block(name, val, leadCnt = 0, position = _AS_ELEMENT_):
+
+def build_pair_block(name, val, leadCnt=0, position=_AS_ELEMENT_):
     ret = pstr('')
 
     tail = tail_symbol(position)
 
-    ret += _b(leading*leadCnt + typeval(name) + ':')
+    ret += _b(leading * leadCnt + typeval(name) + ':')
     if is_extendable(val) and maxDeep > leadCnt:
         if newline or isinstance(val, (types.InstanceType, types.FunctionType)):
             ret += _b(pstr('\n'))
-            leadCnt = leadCnt+1
+            leadCnt = leadCnt + 1
         else:
             ret += _b(pstr(" "))
 
@@ -182,10 +203,12 @@ def build_pair_block(name, val, leadCnt = 0, position = _AS_ELEMENT_):
             ret += _b(pstr(" ") + typeval(val) + pstr(tail + '\n'))
     return ret
 
-def build_string_block(s, leadCnt = 0):
-    return _b(leadCnt*leading + typeval(s) + pstr('\n'))
 
-def build_list_block(o, leadCnt = 0, position = _AS_VALUE_):
+def build_string_block(s, leadCnt=0):
+    return _b(leadCnt * leading + typeval(s) + pstr('\n'))
+
+
+def build_list_block(o, leadCnt=0, position=_AS_VALUE_):
     ret = pstr('')
 
     tail = tail_symbol(position)
@@ -196,26 +219,28 @@ def build_list_block(o, leadCnt = 0, position = _AS_VALUE_):
         if all(_f):
             _o = map(lambda e: typeval(e), o)
             if newline or position & _AS_ELEMENT_:
-                ret += pstr(leading*leadCnt)
+                ret += pstr(leading * leadCnt)
             ret += pstr("[") + ', '.join(_o) + pstr("]%s\n" % tail)
             return _b(ret)
 
     # [
     if newline or position & _AS_ELEMENT_:
-        ret += _b(leading*leadCnt + pstr('[\n'))
+        ret += _b(leading * leadCnt + pstr('[\n'))
     else:
         ret += _b(pstr('[\n'))
 
     # body
     for e in o:
-        ret += build_single_block(e, leadCnt+1, _AS_ELEMENT_ | _AS_LIST_ELEMENT_)
+        ret += build_single_block(e, leadCnt + 1,
+                                  _AS_ELEMENT_ | _AS_LIST_ELEMENT_)
 
     # ]
-    ret += _b(leading*leadCnt + pstr(']%s\n' % tail))
+    ret += _b(leading * leadCnt + pstr(']%s\n' % tail))
 
     return ret
 
-def build_tuple_block(o, leadCnt = 0, position = _AS_VALUE_):
+
+def build_tuple_block(o, leadCnt=0, position=_AS_VALUE_):
     ret = pstr('')
 
     tail = tail_symbol(position)
@@ -229,28 +254,30 @@ def build_tuple_block(o, leadCnt = 0, position = _AS_VALUE_):
 
     # (
     if newline or position & _AS_ELEMENT_:
-        ret += _b(leading*leadCnt + pstr('(\n'))
+        ret += _b(leading * leadCnt + pstr('(\n'))
     else:
         ret += _b(pstr('(\n'))
 
     # body
     for e in o:
-        ret += build_single_block(e, leadCnt+1, _AS_ELEMENT_ | _AS_TUPLE_ELEMENT_)
+        ret += build_single_block(e, leadCnt + 1,
+                                  _AS_ELEMENT_ | _AS_TUPLE_ELEMENT_)
 
     # )
-    ret += _b(leading*leadCnt + pstr(')%s\n' % tail))
+    ret += _b(leading * leadCnt + pstr(')%s\n' % tail))
 
     return ret
 
-def build_dict_block(o, leadCnt = 0, position = _AS_VALUE_):
+
+def build_dict_block(o, leadCnt=0, position=_AS_VALUE_):
     ret = pstr('')
 
     tail = tail_symbol(position)
     # {
     if newline or position & _AS_ELEMENT_:
-        ret += _b(leading*leadCnt + pstr('{')+pstr('\n'))
+        ret += _b(leading * leadCnt + pstr('{') + pstr('\n'))
     else:
-        ret += _b(pstr('{')+pstr('\n'))
+        ret += _b(pstr('{') + pstr('\n'))
 
     # body
     for k in o:
@@ -262,22 +289,23 @@ def build_dict_block(o, leadCnt = 0, position = _AS_VALUE_):
         ret += build_pair_block(k, v, leadCnt + 1)
 
     # }
-    ret += _b(leading*leadCnt + '}' + pstr(tail + '\n'))
-            
+    ret += _b(leading * leadCnt + '}' + pstr(tail + '\n'))
+
     return ret
 
-def build_class_block(o, leadCnt = 0, position = _AS_ELEMENT_):
+
+def build_class_block(o, leadCnt=0, position=_AS_ELEMENT_):
     ret = pstr('')
 
     # {
     _leading = leading * leadCnt
 
     if hasattr(o, '__class__'):
-        ret += _b(_leading + pstr('object(%s):'%o.__class__.__name__)+pstr('\n'))
+        ret += _b(_leading + pstr('object(%s):' %
+                                  o.__class__.__name__) + pstr('\n'))
     else:
         '本身就是类，不是对象'
-        ret += _b(_leading + pstr('class(%s):'%o.__name__)+pstr('\n'))
-
+        ret += _b(_leading + pstr('class(%s):' % o.__name__) + pstr('\n'))
 
     # body
     props = dir(o)
@@ -303,13 +331,15 @@ def build_class_block(o, leadCnt = 0, position = _AS_ELEMENT_):
             position = _AS_CLASS_ELEMENT_
 
         #'忽略掉 以__开头的成员、自引用成员、函数成员'
-        ret += build_pair_block(attr, val, leadCnt+1, position)
+        ret += build_pair_block(attr, val, leadCnt + 1, position)
 
-    ret += pstr((leadCnt + 1) * leading) + pstr("<filter %d props>\n" % filter_count)
+    ret += pstr((leadCnt + 1) * leading) + \
+        pstr("<filter %d props>\n" % filter_count)
 
     # }
     #ret += leading*leadCnt + '}' + pstr('\n')
     return ret
+
 
 def typeval(v):
     #print "%s, %s, %s, %s" % (v, type(v), type(''), encoding)
@@ -324,18 +354,29 @@ def typeval(v):
         else:
             ret = pstr(v)
     except Exception, e:
-        ret = pstr("<CAN NOT PARSE OBJECT>")
+        if priority_strategy == _PS_CORRECTNESS_FIRST:
+            print_exc_plus()
+            raise e
+            # raise Exception(e)
+        # priority_strategy == _PS_CONTENT_FIRST:
+        hx = v.decode("latin-1").encode("hex")
+        ret = pstr("<CAN NOT PARSE OBJECT(hex:" + hx + "):" + str(e) + ">")
 
     return ret
 
+
 class testcls2:
+
     def __init__(self):
         self.t1 = 't1'
         self.t2 = 't三'
+
+
 class testcls:
     a = 'aaaa'
     b = 'bbbb'
     c = '三三三'
+
     def __init__(self):
         self.p1 = 'p1'
         self.p2 = 222
@@ -350,6 +391,7 @@ class testcls:
             'tuple': ('中文', 3, 3.4, testcls2()),
             'obj': testcls2()
         }
+
     def func(self):
         pass
 
@@ -371,10 +413,9 @@ if __name__ == '__main__':
         #dump_obj('a')
         #dump_obj('哈哈')
         #dump_obj({'a':1, 'b':2, 'c':[2,3]})
-        dump_obj(t)
+        #dump_obj(t)
         dump_obj(typeval)
         open("afdasfa/fasdfasf")
     except Exception as e:
         print e
         #print dump_obj(inspect.trace())
-
