@@ -1,5 +1,8 @@
 # -*- coding:utf-8 -*-
 from __future__ import print_function
+from __future__ import absolute_import
+from __future__ import unicode_literals
+from __future__ import division
 import sys
 import traceback
 import types
@@ -11,8 +14,14 @@ if sys.version_info < (3, 0):
     reload(sys)
     sys.setdefaultencoding('utf-8')
 
+    pyv = 2
+else:
+    unicode = str
+    pyv = 3
+
 from . import settings as S
 from . import constants as C
+from .debug_kit import debug
 
 
 def object_attr_default_filter(obj, name, val):
@@ -49,18 +58,23 @@ def _b(s):
     return s
 
 def pstr(s):
+    '''convert all string to unicode
+    for unicode is python's built-in coding
+    '''
     res = u''
 
     if isinstance(s, unicode):
         res += s
     elif isinstance(s, str):
+        # in python 2/3, it's utf8
+        # so decode to unicode
         res += s.decode(S.encoding)
     else:
-        res += str(s).decode(S.encoding)
+        res += str(s)#.decode(S.encoding)
 
     return res
 
-def dump_obj(o, output=True):
+def beeprint(o, output=True):
 
     res = build_single_block(o, 0)
     if output and not S.write_to_buffer_when_execute:
@@ -126,6 +140,9 @@ def tail_symbol(position):
 
 def build_single_block(obj, leadCnt=0, position=C._AS_ELEMENT_):
     '遍历对象，判断对象内成员的类型，然后调用对应的 build_*_block() 处理'
+
+    debug(0, leadCnt, 'ready to build %s:%s' % (type(obj), obj))
+
     ret = pstr('')
 
     tail = tail_symbol(position)
@@ -140,15 +157,20 @@ def build_single_block(obj, leadCnt=0, position=C._AS_ELEMENT_):
         return _b(ret)
 
     if isinstance(obj, dict):
+        debug(0, leadCnt, 'is dict')
         ret += build_dict_block(obj, leadCnt, position)
     elif isinstance(obj, list):
+        debug(0, leadCnt, 'is list')
         ret += build_list_block(obj, leadCnt, position)
     elif isinstance(obj, tuple):
+        debug(0, leadCnt, 'is tuple')
         ret += build_tuple_block(obj, leadCnt, position)
     # hasattr(obj, '__dict__') or isinstance(obj, object):
     elif is_extendable(obj):
+        debug(0, leadCnt, 'is extendable')
         ret += build_class_block(obj, leadCnt, position)
     else:
+        debug(0, leadCnt, 'is simple type')
         ret += _b(leadCnt * S.leading + typeval(obj) + pstr(tail + '\n'))
 
     return ret
@@ -320,15 +342,21 @@ def build_class_block(o, leadCnt=0, position=C._AS_ELEMENT_):
 
 def typeval(v):
     try:
-        m = pstr(v).replace(u'\n', u'\\n')
-        m = m.replace(u'\r', u'\\r')
-
-        if isinstance(v, str):
-            ret = pstr('"') + m + pstr('"')
-        elif isinstance(v, unicode):
-            ret = pstr('u\'') + m + pstr('\'')
+        st = string_type(v)
+        ret = u''
+        if st == C.ST_LITERAL:
+            ret = u'"' + pstr(v) + u'"'
+        elif st == C.ST_UNICODE:
+            ret = u"u'" + v + u"'"
+        elif st == C.ST_BYTES:
+            # in py3, printed string will enclose with b''
+            ret = pstr(v)
         else:
             ret = pstr(v)
+
+        ret = ret.replace(u'\n', u'\\n')
+        ret = ret.replace(u'\r', u'\\r')
+
     except Exception as e:
         if S.priority_strategy == C._PS_CORRECTNESS_FIRST:
             print_exc_plus()
@@ -340,46 +368,23 @@ def typeval(v):
     return ret
 
 
-class testcls2:
+def string_type(s):
 
-    def __init__(self):
-        self.t1 = 't1'
-        self.t2 = 't三'
-
-
-class testcls:
-    a = 'aaaa'
-    b = 'bbbb'
-    c = '三三三'
-
-    def __init__(self):
-        self.p1 = 'p1'
-        self.p2 = 222
-        self.p3 = testcls2()
-        self.f = typeval
-        self.p4 = {
-            'a': 'va',
-            'u': u'unicode',
-            '键': '值',
-            'i': 123,
-            'list': ['值值', 1, 1.3],
-            'tuple': ('中文', 3, 3.4, testcls2()),
-            'obj': testcls2()
-        }
-
-    def func(self):
-        pass
-
-if __name__ == '__main__':
-
-    S.newline = False
-    S.bufferHandle = open("../tmps/tools/dump.test", "w+")
-    S.tuple_in_line = False
-    S.list_in_line = True
-    S.maxDeep = 3
-    try:
-        t = testcls()
-        dump_obj(typeval)
-        open("afdasfa/fasdfasf")
-    except Exception as e:
-        print(e)
+    if pyv == 2:
+        # in py2, string literal is both instance of str and bytes
+        # a literal string is str
+        # a utf8 string is str
+        # a u-prefixed string is unicode
+        if isinstance(s, unicode):
+            return C.ST_UNICODE
+        elif isinstance(s, str): # same as isinstance(v, bytes)
+            return C.ST_LITERAL
+    else:
+        # in py3, 
+        # a literal string is str
+        # a u-prefixed string is str
+        # a utf8 string is bytes
+        if isinstance(s, bytes):
+            return C.ST_BYTES
+        elif isinstance(s, str):
+            return C.ST_LITERAL

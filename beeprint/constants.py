@@ -1,4 +1,8 @@
 # -*- coding:utf-8 -*-
+from __future__ import print_function
+from __future__ import absolute_import
+from __future__ import unicode_literals
+from __future__ import division
 
 # >> 优先策略
 # 正确性优先，尽量正确显示出所有字段，有无法解析的字段立即报错并退出
@@ -13,3 +17,8 @@ _AS_LIST_ELEMENT_ = \
     _AS_DICT_ELEMENT_ = \
     _AS_TUPLE_ELEMENT_ = \
     _AS_CLASS_ELEMENT_ = 4
+
+# string type
+ST_LITERAL = 1 # string literal depends on script's coding
+ST_UNICODE = 2
+ST_BYTES = 4
