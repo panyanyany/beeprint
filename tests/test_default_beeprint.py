@@ -40,9 +40,16 @@ class TestSimpleTypes(unittest.TestCase):
         # utf8 string
         s = u'utf8 string'.encode('utf-8')
         if pyv == 2:
-            self.assertEqual(beeprint(s, output=False), "\"utf8 string\"\n")
+            self.assertEqual(beeprint(s, output=False), u"\"utf8 string\"\n")
         elif pyv == 3:
-            self.assertEqual(beeprint(s, output=False), "b'utf8 string'\n")
+            self.assertEqual(beeprint(s, output=False), u"b'utf8 string'\n")
+
+        # gb2312 string
+        s = u'gb2312 string'.encode('gb2312')
+        if pyv == 2:
+            self.assertEqual(beeprint(s, output=False), u"\"gb2312 string\"\n")
+        elif pyv == 3:
+            self.assertEqual(beeprint(s, output=False), u"b'gb2312 string'\n")
 
 
 if __name__ == '__main__':
