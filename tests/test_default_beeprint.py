@@ -28,28 +28,30 @@ class TestSimpleTypes(unittest.TestCase):
     def test_string(self):
         # string literal
         # S.debug = True
-        self.assertEqual(beeprint("plain string", output=False), '"plain string"\n')
+        if pyv == 2:
+            self.assertEqual(beeprint("plain string", output=False), "b'plain string'\n")
+        elif pyv == 3:
+            self.assertEqual(beeprint("plain string", output=False), "u'plain string'\n")
 
         # unicode string
         s = u'unicode string'
-        if pyv == 2:
-            self.assertEqual(beeprint(s, output=False), u"u'unicode string'\n")
-        elif pyv == 3:
-            self.assertEqual(beeprint(s, output=False), u'"unicode string"\n')
+        self.assertEqual(beeprint(s, output=False), u"u'unicode string'\n")
 
         # utf8 string
         s = u'utf8 string'.encode('utf-8')
-        if pyv == 2:
-            self.assertEqual(beeprint(s, output=False), u"\"utf8 string\"\n")
-        elif pyv == 3:
-            self.assertEqual(beeprint(s, output=False), u"b'utf8 string'\n")
+        self.assertEqual(beeprint(s, output=False), u"b'utf8 string'\n")
 
         # gb2312 string
         s = u'gb2312 string'.encode('gb2312')
-        if pyv == 2:
-            self.assertEqual(beeprint(s, output=False), u"\"gb2312 string\"\n")
-        elif pyv == 3:
-            self.assertEqual(beeprint(s, output=False), u"b'gb2312 string'\n")
+        self.assertEqual(beeprint(s, output=False), u"b'gb2312 string'\n")
+
+        # unicode special characters string
+        s = u'\\'
+        self.assertEqual(beeprint(s, output=False), u"u'\\'\n")
+
+        # utf8 special characters string
+        s = u'\\'.encode("utf8")
+        self.assertEqual(beeprint(s, output=False), u"b'\\'\n")
 
 
 if __name__ == '__main__':

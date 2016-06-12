@@ -342,20 +342,22 @@ def build_class_block(o, leadCnt=0, position=C._AS_ELEMENT_):
 
 def typeval(v):
     try:
-        st = string_type(v)
-        ret = u''
-        if st == C.ST_LITERAL:
-            ret = u'"' + pstr(v) + u'"'
-        elif st == C.ST_UNICODE:
-            ret = u"u'" + v + u"'"
-        elif st == C.ST_BYTES:
-            # in py3, printed string will enclose with b''
-            ret = pstr(v)
-        else:
-            ret = pstr(v)
+        if S.united_str_coding_representation:
+            st = string_type(v)
+            ret = u''
+            if st & C.ST_UNICODE != 0:
+                ret = u"u'" + v + u"'"
+            elif st & C.ST_BYTES != 0:
+                # in py3, printed string will enclose with b''
+                # ret = pstr(v)
+                ret = u"b'" + v.decode(S.encoding) + u"'"
+            else:
+                ret = pstr(v)
 
-        ret = ret.replace(u'\n', u'\\n')
-        ret = ret.replace(u'\r', u'\\r')
+            ret = ret.replace(u'\n', u'\\n')
+            ret = ret.replace(u'\r', u'\\r')
+        else:
+            ret = u'<YOU HAVE UNSET S.united_str_coding_representation>'
 
     except Exception as e:
         if S.priority_strategy == C._PS_CORRECTNESS_FIRST:
@@ -372,19 +374,20 @@ def string_type(s):
 
     if pyv == 2:
         # in py2, string literal is both instance of str and bytes
-        # a literal string is str
-        # a utf8 string is str
+        # a literal string is str (i.e: coding encoded, eg: utf8)
         # a u-prefixed string is unicode
         if isinstance(s, unicode):
             return C.ST_UNICODE
         elif isinstance(s, str): # same as isinstance(v, bytes)
-            return C.ST_LITERAL
+            return C.ST_LITERAL | C.ST_BYTES
     else:
         # in py3, 
-        # a literal string is str
+        # a literal string is str (i.e: unicode encoded)
         # a u-prefixed string is str
         # a utf8 string is bytes
         if isinstance(s, bytes):
             return C.ST_BYTES
         elif isinstance(s, str):
-            return C.ST_LITERAL
+            return C.ST_LITERAL | C.ST_UNICODE
+
+    return C.ST_UNDEFINED

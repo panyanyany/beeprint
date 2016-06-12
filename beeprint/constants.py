@@ -22,3 +22,4 @@ _AS_LIST_ELEMENT_ = \
 ST_LITERAL = 1 # string literal depends on script's coding
 ST_UNICODE = 2
 ST_BYTES = 4
+ST_UNDEFINED = 0

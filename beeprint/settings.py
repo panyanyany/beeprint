@@ -27,3 +27,9 @@ prop_filters = [types.MethodType]
 priority_strategy = C._PS_CONTENT_FIRST
 
 debug = False
+
+# united_str_coding_representation
+# In spite of python version
+# unicode string will be displayed as u''
+# non-unicode string will be displayed as b''
+united_str_coding_representation = True
