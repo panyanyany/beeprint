@@ -36,6 +36,9 @@ d = {
 
 def f(): pass
 
+class CE: pass
+class CE2(object): pass
+
 class c: 
     def mth():pass
     static_props = 1
@@ -57,6 +60,8 @@ values = [
     [1],
     (1,2),
     f,
+    CE,
+    CE2,
     c,
     c2,
     ic,

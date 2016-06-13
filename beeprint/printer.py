@@ -193,7 +193,12 @@ def build_pair_block(name, val, leadCnt=0, position=C._AS_ELEMENT_):
 
     tail = tail_symbol(position)
 
-    ret += _b(S.leading * leadCnt + typeval(name) + ':')
+    if position & C._AS_CLASS_ELEMENT_:
+        # class method name or attribute name no need to add u or b prefix
+        name = pstr(name)
+    else:
+        name = typeval(name)
+    ret += _b(S.leading * leadCnt + name + ':')
     if is_extendable(val) and S.maxDeep > leadCnt:
         # value need to be dispalyed on new line
         # including: 
@@ -367,10 +372,12 @@ def build_class_block(o, leadCnt=0, position=C._AS_ELEMENT_):
         ret += build_pair_block(attr, 
                                 val, 
                                 leadCnt + 1, 
-                                position & C._AS_CLASS_ELEMENT_)
+                                position | C._AS_CLASS_ELEMENT_)
 
-    ret += pstr((leadCnt + 1) * S.leading) + \
-        pstr("<... %d props>\n" % filter_count)
+    if filter_count == props_cnt:
+        ret = ret[:-2] + pstr(',\n')
+    # ret += pstr((leadCnt + 1) * S.leading) + \
+    #     pstr("<... %d props>\n" % filter_count)
 
     # }
     #ret += S.leading*leadCnt + '}' + pstr('\n')
