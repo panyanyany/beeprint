@@ -34,3 +34,5 @@ debug_level = 0
 # unicode string will be displayed as u''
 # non-unicode string will be displayed as b''
 united_str_coding_representation = True
+str_display_not_prefix_u = True
+str_display_not_prefix_b = True

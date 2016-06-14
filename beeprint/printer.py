@@ -390,11 +390,17 @@ def typeval(v):
             st = string_type(v)
             ret = u''
             if st & C.ST_UNICODE != 0:
-                ret = u"u'" + v + u"'"
+                if S.str_display_not_prefix_u:
+                    ret = u"'" + v + u"'"
+                else:
+                    ret = u"u'" + v + u"'"
             elif st & C.ST_BYTES != 0:
                 # in py3, printed string will enclose with b''
                 # ret = pstr(v)
-                ret = u"b'" + v.decode(S.encoding) + u"'"
+                if S.str_display_not_prefix_b:
+                    ret = u"'" + v.decode(S.encoding) + u"'"
+                else:
+                    ret = u"b'" + v.decode(S.encoding) + u"'"
             else:
                 ret = pstr(v)
 

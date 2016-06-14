@@ -28,6 +28,8 @@ class TestSimpleTypes(unittest.TestCase):
     def test_string(self):
         # string literal
         # S.debug = True
+        S.str_display_not_prefix_u = False
+        S.str_display_not_prefix_b = False
         if pyv == 2:
             self.assertEqual(beeprint("plain string", output=False), "b'plain string'\n")
         elif pyv == 3:
