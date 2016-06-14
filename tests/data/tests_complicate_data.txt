@@ -1,0 +1,29 @@
+[
+  1,
+  1.1,
+  u's',
+  u'us',
+  u'a中文',
+  u'a中文',
+  [1],
+  (1, 2),
+  function(f),
+  class(CE),
+  class(CE2),
+  class(c):
+    mth: function(mth),
+    static_props: 1,
+  class(c2):
+    mth: function(mth),
+    static_props: 1,
+  instance(c):
+    static_props: 1,
+  instance(c2):
+    static_props: 1,
+  method(mth),
+  method(mth),
+  {
+    u'key': u'val',
+    u'key2': u'val',
+  },
+]

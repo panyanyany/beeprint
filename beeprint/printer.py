@@ -134,9 +134,9 @@ def tail_symbol(position):
             position & C._AS_DICT_ELEMENT_ or
             position & C._AS_CLASS_ELEMENT_ or
             position & C._AS_TUPLE_ELEMENT_):
-        tail = ','
+        tail = u','
     else:
-        tail = ''
+        tail = u''
     return tail
 
 
@@ -308,7 +308,7 @@ def build_dict_block(o, leadCnt=0, position=C._AS_VALUE_):
             continue
         #ret += S.leading*(leadCnt + 1) + typeval(k) + pstr(": ")
         #ret += build_single_block(v, leadCnt+1)
-        ret += build_pair_block(k, v, leadCnt + 1)
+        ret += build_pair_block(k, v, leadCnt + 1, C._AS_DICT_ELEMENT_)
 
     # }
     ret += _b(S.leading * leadCnt + '}' + pstr(tail + '\n'))

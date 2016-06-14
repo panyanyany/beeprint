@@ -22,9 +22,10 @@ _AS_VALUE_ = 2
 # it must has a parent block
 # eg: [1, 2], {'key1': 'val1', 'key2': 'val2'}, (1, 2)
 _AS_LIST_ELEMENT_ = \
-    _AS_DICT_ELEMENT_ = \
-    _AS_TUPLE_ELEMENT_ = \
-    _AS_CLASS_ELEMENT_ = 4
+    _AS_TUPLE_ELEMENT_ = 4
+
+_AS_DICT_ELEMENT_ = 8
+_AS_CLASS_ELEMENT_ = 16
 
 # string type
 ST_LITERAL = 1 # string literal depends on script's coding

@@ -12,6 +12,46 @@ from beeprint.printer import beeprint, pyv
 from beeprint import settings as S
 
 
+def f(): pass
+
+class CE: pass
+class CE2(object): pass
+
+class c: 
+    def mth():pass
+    static_props = 1
+
+class c2(object): 
+    def mth():pass
+    static_props = 1
+
+ic = c()
+ic2 = c2()
+
+values = [
+    1,
+    1.1,
+    "s",
+    u"us",
+    "a中文",
+    u"a中文",
+    [1],
+    (1,2),
+    f,
+    CE,
+    CE2,
+    c,
+    c2,
+    ic,
+    ic2,
+    ic.mth,
+    ic2.mth,
+    {
+        'key': 'val',
+        u'key2': u'val',
+    },
+]
+
 class TestSimpleTypes(unittest.TestCase):
 
     def setUp(self):
@@ -54,6 +94,24 @@ class TestSimpleTypes(unittest.TestCase):
         # utf8 special characters string
         s = u'\\'.encode("utf8")
         self.assertEqual(beeprint(s, output=False), u"b'\\'\n")
+
+    def test_complicate_data(self):
+        S.str_display_not_prefix_u = False
+        S.str_display_not_prefix_b = False
+
+        ans = u""
+        with open(os.path.join(CUR_SCRIPT_PATH, 
+                               'data/tests_complicate_data.txt')) as fp:
+            ans = fp.read()
+
+        # to prevent comparing fail in unordered keys to dict
+        ans2 = u""
+        with open(os.path.join(CUR_SCRIPT_PATH, 
+                               'data/tests_complicate_data2.txt')) as fp:
+            ans2 = fp.read()
+
+        res = beeprint(values, output=False)
+        self.assertEqual(res == ans or res == ans2, True)
 
 
 if __name__ == '__main__':
