@@ -8,6 +8,7 @@ import types
 
 
 from . import constants as C
+from . import utils
 
 outfile = sys.stdout
 encoding = 'utf-8'
@@ -21,7 +22,7 @@ list_in_line = True
 # 过滤以 x 开头的属性
 prop_leading_filters = ["__", "func_"]
 # 根据类型过滤对象的属性
-prop_filters = [types.MethodType, types.BuiltinFunctionType, types.BuiltinMethodType, 'im_func', 'im_self', 'im_class']
+prop_filters = [utils.is_pan_function, 'im_func', 'im_self', 'im_class']
 
 # >> 优先策略
 priority_strategy = C._PS_CONTENT_FIRST
@@ -36,3 +37,5 @@ debug_level = 0
 united_str_coding_representation = True
 str_display_not_prefix_u = True
 str_display_not_prefix_b = True
+
+element_display_last_with_comma = True

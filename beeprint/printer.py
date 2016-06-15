@@ -8,17 +8,16 @@ import traceback
 import types
 import inspect
 
-if sys.version_info < (3, 0):
+from .utils import pyv
+
+if pyv == 2:
     # avoid throw [UnicodeEncodeError: 'ascii' codec can't encode characters]
     # exceptions, without these lines, the sys.getdefaultencoding() returns ascii
     from imp import reload
     reload(sys)
     sys.setdefaultencoding('utf-8')
-
-    pyv = 2
 else:
     unicode = str
-    pyv = 3
 
 from . import settings as S
 from . import constants as C
@@ -39,12 +38,13 @@ def object_attr_default_filter(obj, name, val):
                 return True
         # filter is a type
         # if type(prop) == types.TypeType:
-        elif isinstance(prop, type):
+        if isinstance(prop, type):
             if type(val) == prop:
                 return True
         # filter is callable
         elif hasattr(prop, '__call__'):
-            return prop(name, val)
+            if prop(name, val):
+                return True
 
     return False
 
@@ -208,12 +208,12 @@ def build_pair_block(name, val, leadCnt=0, position=C._AS_ELEMENT_):
                          position & C._AS_ELEMENT_):
             ret += _b(pstr('\n'))
             leadCnt = leadCnt + 1
-            position = C._AS_ELEMENT_
+            position |= C._AS_ELEMENT_
             debug(C._DL_STATEMENT, leadCnt, 'make newline')
         # value will be dispalyed immediately after one space
         else:
             ret += _b(pstr(" "))
-            position = C._AS_VALUE_
+            position |= C._AS_VALUE_
 
         ret += build_single_block(val, leadCnt, position)
     else:
@@ -221,6 +221,7 @@ def build_pair_block(name, val, leadCnt=0, position=C._AS_ELEMENT_):
             ret += _b(pstr(" <OUT OF RANGE>%s\n" % tail))
         else:
             ret += _b(pstr(" ") + typeval(val) + pstr(tail + '\n'))
+
     return ret
 
 
@@ -311,7 +312,7 @@ def build_dict_block(o, leadCnt=0, position=C._AS_VALUE_):
         ret += build_pair_block(k, v, leadCnt + 1, C._AS_DICT_ELEMENT_)
 
     # }
-    ret += _b(S.leading * leadCnt + '}' + pstr(tail + '\n'))
+    ret += _b(S.leading * leadCnt + '}' + pstr(tail + u'\n'))
 
     return ret
 
@@ -322,6 +323,8 @@ def build_class_block(o, leadCnt=0, position=C._AS_ELEMENT_):
           ('obj:%s leadCnt:%s position:%d' \
            % (o, leadCnt, position)))
     ret = pstr('')
+
+    tail = tail_symbol(position)
 
     # {
     _leading = pstr('')
@@ -374,13 +377,15 @@ def build_class_block(o, leadCnt=0, position=C._AS_ELEMENT_):
                                 leadCnt + 1, 
                                 position | C._AS_CLASS_ELEMENT_)
 
-    if filter_count == props_cnt:
-        ret = ret[:-2] + pstr(',\n')
-    # ret += pstr((leadCnt + 1) * S.leading) + \
-    #     pstr("<... %d props>\n" % filter_count)
-
     # }
-    #ret += S.leading*leadCnt + '}' + pstr('\n')
+    if filter_count == props_cnt:
+        # right strip ':\n'
+        ret = ret[:-2]
+    else:
+        # right strip ',\n' which belongs to last element of class
+        ret = ret[:-2]
+
+    ret += pstr(tail + u'\n')
     return ret
 
 

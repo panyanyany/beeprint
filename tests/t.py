@@ -1,11 +1,15 @@
 # -*- coding:utf-8 -*-
 from __future__ import print_function
+from __future__ import absolute_import
+
+from imp import reload
 
 import unittest
 import os
 import sys
 import types
 import inspect
+
 
 CUR_SCRIPT_PATH = os.path.dirname(os.path.abspath(__file__))
 BEEPRINT_PATH = os.path.abspath(os.path.join(CUR_SCRIPT_PATH, '..'))
@@ -14,7 +18,6 @@ sys.path.append(BEEPRINT_PATH)
 if sys.version_info < (3, 0):
     # avoid throw [UnicodeEncodeError: 'ascii' codec can't encode characters]
     # exceptions, without these lines, the sys.getdefaultencoding() returns ascii
-    from imp import reload
     reload(sys)
     sys.setdefaultencoding('utf-8')
 
@@ -26,53 +29,13 @@ else:
 from beeprint.printer import beeprint as pp, pyv
 from beeprint import settings as S 
 
-d = {
-    "key": "val",
-    "list": [1, 2, 3, "string", 1.2],
-    "dict": {
-        "key": "val",
-    },
-}
+try:
+    from .definition import values
+    from .definition import ic, ic2, c, c2, f
+except:
+    from definition import values
+    from definition import ic, ic2, c, c2, f
 
-def f(): pass
-
-class CE: pass
-class CE2(object): pass
-
-class c: 
-    def mth():pass
-    static_props = 1
-
-class c2(object): 
-    def mth():pass
-    static_props = 1
-
-ic = c()
-ic2 = c2()
-
-values = [
-    1,
-    1.1,
-    "s",
-    u"us",
-    "a中文",
-    u"a中文",
-    [1],
-    (1,2),
-    f,
-    CE,
-    CE2,
-    c,
-    c2,
-    ic,
-    ic2,
-    ic.mth,
-    ic2.mth,
-    {
-        'key': 'val',
-        u'key2': u'val',
-    },
-]
 
 # >> utilities
 def detect_same_attrs(*args):
@@ -112,8 +75,12 @@ def inst_test():
         print('%40s: %s' % (attr, v))
 
 def builtin_test():
-    for v in [ic.mth.im_func, ic2.mth.im_func]:
-        print('%40s: %s' % (v, inspect.ismethod(v)))
+    for v in [f, c.mth, c2.mth, ic.mth, ic2.mth]:
+        # print('%40s: %s' % (v, isinstance(v, types.MethodType))) py2 all true
+        # print('%40s: %s' % (v, inspect.ismethod(v))) py2 all true
+        # print('%40s: %s' % (v, inspect.isbuiltin(v))) py2 all false
+        # print('%40s: %s' % (v, inspect.ismethod(v))) py3 FFTT
+        print('%40s: %s, %s' % (v, v.__qualname__, inspect.getargspec(v).args))
 
 args = {
     "class_test": class_test,
@@ -124,8 +91,8 @@ args = {
 def main():
     if len(sys.argv) == 1:
         # S.debug_level = 9
-        S.str_display_not_prefix_u = False
-        S.str_display_not_prefix_b = False
+        # S.str_display_not_prefix_u = False
+        # S.str_display_not_prefix_b = False
 
         pp(values)
         # pp([ic.mth, ic2.mth])

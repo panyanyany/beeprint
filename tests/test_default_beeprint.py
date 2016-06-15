@@ -3,6 +3,7 @@
 import unittest
 import os
 import sys
+import codecs
 
 CUR_SCRIPT_PATH = os.path.dirname(os.path.abspath(__file__))
 BEEPRINT_PATH = os.path.abspath(os.path.join(CUR_SCRIPT_PATH, '..'))
@@ -11,46 +12,11 @@ sys.path.append(BEEPRINT_PATH)
 from beeprint.printer import beeprint, pyv
 from beeprint import settings as S
 
+try:
+    from .definition import values
+except:
+    from definition import values
 
-def f(): pass
-
-class CE: pass
-class CE2(object): pass
-
-class c: 
-    def mth():pass
-    static_props = 1
-
-class c2(object): 
-    def mth():pass
-    static_props = 1
-
-ic = c()
-ic2 = c2()
-
-values = [
-    1,
-    1.1,
-    "s",
-    u"us",
-    "a中文",
-    u"a中文",
-    [1],
-    (1,2),
-    f,
-    CE,
-    CE2,
-    c,
-    c2,
-    ic,
-    ic2,
-    ic.mth,
-    ic2.mth,
-    {
-        'key': 'val',
-        u'key2': u'val',
-    },
-]
 
 class TestSimpleTypes(unittest.TestCase):
 
@@ -96,22 +62,25 @@ class TestSimpleTypes(unittest.TestCase):
         self.assertEqual(beeprint(s, output=False), u"b'\\'\n")
 
     def test_complicate_data(self):
-        S.str_display_not_prefix_u = False
-        S.str_display_not_prefix_b = False
+        # S.str_display_not_prefix_u = False
+        # S.str_display_not_prefix_b = False
 
         ans = u""
-        with open(os.path.join(CUR_SCRIPT_PATH, 
-                               'data/tests_complicate_data.txt')) as fp:
+        data_path = os.path.join(CUR_SCRIPT_PATH, 
+                                 'data/tests_complicate_data.txt')
+        with codecs.open(data_path, encoding="utf8") as fp:
             ans = fp.read()
 
         # to prevent comparing fail in unordered keys to dict
         ans2 = u""
-        with open(os.path.join(CUR_SCRIPT_PATH, 
-                               'data/tests_complicate_data2.txt')) as fp:
+        data_path = os.path.join(CUR_SCRIPT_PATH, 
+                                 'data/tests_complicate_data2.txt')
+        with codecs.open(data_path, encoding="utf8") as fp:
             ans2 = fp.read()
 
         res = beeprint(values, output=False)
         self.assertEqual(res == ans or res == ans2, True)
+        # self.assertEqual(res, ans)
 
 
 if __name__ == '__main__':
