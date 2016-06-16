@@ -13,9 +13,9 @@ from beeprint.printer import beeprint, pyv
 from beeprint import settings as S
 
 try:
-    from .definition import values
+    from .definition import values, long_text_en
 except:
-    from definition import values
+    from definition import values, long_text_en
 
 
 class TestSimpleTypes(unittest.TestCase):
@@ -80,6 +80,11 @@ class TestSimpleTypes(unittest.TestCase):
 
         res = beeprint(values, output=False)
         self.assertEqual(res == ans or res == ans2, True)
+        # self.assertEqual(res, ans)
+
+    def test_long_text(self):
+        pass
+        # res = beeprint(long_text_en, output=False)
         # self.assertEqual(res, ans)
 
 

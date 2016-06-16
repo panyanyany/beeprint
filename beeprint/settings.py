@@ -25,7 +25,7 @@ buffer_handler = sys.stdout
 # use buffer_handler.flush() every print
 write_to_buffer_when_execute = False
 
-# >> class controll
+# >> class control
 # 过滤以 x 开头的属性
 prop_leading_filters = ["__", "func_"]
 # 根据类型过滤对象的属性
@@ -39,6 +39,7 @@ priority_strategy = C._PS_CONTENT_FIRST
 # debug = False
 debug_level = 0
 
+# >> string control
 # united_str_coding_representation
 # In spite of python version
 # unicode string will be displayed as u''
@@ -46,5 +47,9 @@ debug_level = 0
 united_str_coding_representation = True
 str_display_not_prefix_u = True
 str_display_not_prefix_b = True
+str_display_escape_special_char = True
 
 element_display_last_with_comma = True
+
+# >> long string control
+long_str_wrap_method = C._LS_WRAP_BY_TERMINAL

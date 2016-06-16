@@ -7,6 +7,8 @@ import inspect
 import sys
 import types
 
+from . import constants as C
+
 
 if sys.version_info < (3, 0):
     pyv = 2
@@ -32,3 +34,8 @@ def is_pan_function(name, val):
     function and unbound method and bound method in python 2
     """
     return inspect.isfunction(val) or inspect.ismethod(val)
+
+def long_string_wrapper(ls, how):
+    if how == C._LS_WRAP_BY_80_COLUMN:
+        pass
+    pass

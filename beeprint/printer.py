@@ -412,7 +412,7 @@ def typeval(v):
             ret = ret.replace(u'\n', u'\\n')
             ret = ret.replace(u'\r', u'\\r')
         else:
-            ret = u'<YOU HAVE UNSET S.united_str_coding_representation>'
+            ret = u'<YOU HAVE SET S.united_str_coding_representation TO True>'
 
     except Exception as e:
         if S.priority_strategy == C._PS_CORRECTNESS_FIRST:

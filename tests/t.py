@@ -32,9 +32,11 @@ from beeprint import settings as S
 try:
     from .definition import values
     from .definition import inst_of_normal_class_old_style, inst_of_normal_class_new_style, NormalClassOldStyle, NormalClassNewStyle, EmptyFunc
+    from . import definition as df
 except:
     from definition import values
     from definition import inst_of_normal_class_old_style, inst_of_normal_class_new_style, NormalClassOldStyle, NormalClassNewStyle, EmptyFunc
+    import definition as df
 
 
 # >> utilities
@@ -82,6 +84,7 @@ def builtin_test():
         # print('%40s: %s' % (v, inspect.ismethod(v))) py3 FFTT
         print('%40s: %s, %s' % (v, v.__qualname__, inspect.getargspec(v).args))
 
+
 args = {
     "class_test": class_test,
     "inst_test": inst_test,
@@ -94,7 +97,8 @@ def main():
         # S.str_display_not_prefix_u = False
         # S.str_display_not_prefix_b = False
 
-        pp(values)
+        pp(df.long_text_in_dict)
+        pp(df.long_text_in_list)
         # pp([inst_of_normal_class_old_style.mth, inst_of_normal_class_new_style.mth])
         return
 
