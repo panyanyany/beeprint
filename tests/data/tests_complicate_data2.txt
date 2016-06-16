@@ -7,19 +7,19 @@
   'a中文',
   [1],
   (1, 2),
-  function(f),
-  class(CE),
-  class(CE2),
-  class(c):
+  function(EmptyFunc),
+  class(EmptyClassOldStyle),
+  class(EmptyClassNewStyle),
+  class(NormalClassOldStyle):
     static_props: 1,
-  class(c2):
+  class(NormalClassNewStyle):
     dicts: {
     },
     lists: [],
     static_props: 1,
-  instance(c):
+  instance(NormalClassOldStyle):
     static_props: 1,
-  instance(c2):
+  instance(NormalClassNewStyle):
     dicts: {
     },
     lists: [],

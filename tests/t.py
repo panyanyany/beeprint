@@ -31,10 +31,10 @@ from beeprint import settings as S
 
 try:
     from .definition import values
-    from .definition import ic, ic2, c, c2, f
+    from .definition import inst_of_normal_class_old_style, inst_of_normal_class_new_style, NormalClassOldStyle, NormalClassNewStyle, EmptyFunc
 except:
     from definition import values
-    from definition import ic, ic2, c, c2, f
+    from definition import inst_of_normal_class_old_style, inst_of_normal_class_new_style, NormalClassOldStyle, NormalClassNewStyle, EmptyFunc
 
 
 # >> utilities
@@ -70,12 +70,12 @@ def inst_test():
         else:
             print('%40s: %s' % (v, isinstance(v, object)))
 
-    same_attrs = detect_same_attrs(ic, ic2)
+    same_attrs = detect_same_attrs(inst_of_normal_class_old_style, inst_of_normal_class_new_style)
     for attr, v in same_attrs:
         print('%40s: %s' % (attr, v))
 
 def builtin_test():
-    for v in [f, c.mth, c2.mth, ic.mth, ic2.mth]:
+    for v in [EmptyFunc, NormalClassOldStyle.mth, NormalClassNewStyle.mth, inst_of_normal_class_old_style.mth, inst_of_normal_class_new_style.mth]:
         # print('%40s: %s' % (v, isinstance(v, types.MethodType))) py2 all true
         # print('%40s: %s' % (v, inspect.ismethod(v))) py2 all true
         # print('%40s: %s' % (v, inspect.isbuiltin(v))) py2 all false
@@ -95,7 +95,7 @@ def main():
         # S.str_display_not_prefix_b = False
 
         pp(values)
-        # pp([ic.mth, ic2.mth])
+        # pp([inst_of_normal_class_old_style.mth, inst_of_normal_class_new_style.mth])
         return
 
     for i in range(1, len(sys.argv)):

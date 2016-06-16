@@ -28,10 +28,10 @@ _AS_DICT_ELEMENT_ = 8
 _AS_CLASS_ELEMENT_ = 16
 
 # string type
-ST_LITERAL = 1 # string literal depends on script's coding
-ST_UNICODE = 2
-ST_BYTES = 4
-ST_UNDEFINED = 0
+_ST_LITERAL_ = 1 # string literal depends on script's coding
+_ST_UNICODE_ = 2
+_ST_BYTES_ = 4
+_ST_UNDEFINED_ = 0
 
 # debug level
 _DL_MODULE_ = 1

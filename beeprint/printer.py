@@ -55,8 +55,8 @@ def dict_key_filter(obj, name, val):
 
 def _b(s):
     if S.write_to_buffer_when_execute:
-        S.bufferHandle.write(s)
-        S.bufferHandle.flush()
+        S.buffer_handler.write(s)
+        S.buffer_handler.flush()
     return s
 
 def pstr(s):
@@ -151,7 +151,7 @@ def build_single_block(obj, leadCnt=0, position=C._AS_ELEMENT_):
 
     tail = tail_symbol(position)
 
-    if S.maxDeep < leadCnt:
+    if S.max_depth < leadCnt:
         if S.newline or position & C._AS_ELEMENT_:
             ret = pstr(leadCnt * S.leading) + pstr("<OUT OF RANGE>\n")
         else:
@@ -199,7 +199,7 @@ def build_pair_block(name, val, leadCnt=0, position=C._AS_ELEMENT_):
     else:
         name = typeval(name)
     ret += _b(S.leading * leadCnt + name + ':')
-    if is_extendable(val) and S.maxDeep > leadCnt:
+    if is_extendable(val) and S.max_depth > leadCnt:
         # value need to be dispalyed on new line
         # including: 
         #   class type & class instance
@@ -217,7 +217,7 @@ def build_pair_block(name, val, leadCnt=0, position=C._AS_ELEMENT_):
 
         ret += build_single_block(val, leadCnt, position)
     else:
-        if S.maxDeep <= leadCnt:
+        if S.max_depth <= leadCnt:
             ret += _b(pstr(" <OUT OF RANGE>%s\n" % tail))
         else:
             ret += _b(pstr(" ") + typeval(val) + pstr(tail + '\n'))
@@ -394,12 +394,12 @@ def typeval(v):
         if S.united_str_coding_representation:
             st = string_type(v)
             ret = u''
-            if st & C.ST_UNICODE != 0:
+            if st & C._ST_UNICODE_ != 0:
                 if S.str_display_not_prefix_u:
                     ret = u"'" + v + u"'"
                 else:
                     ret = u"u'" + v + u"'"
-            elif st & C.ST_BYTES != 0:
+            elif st & C._ST_BYTES_ != 0:
                 # in py3, printed string will enclose with b''
                 # ret = pstr(v)
                 if S.str_display_not_prefix_b:
@@ -432,20 +432,20 @@ def string_type(s):
         # a literal string is str (i.e: coding encoded, eg: utf8)
         # a u-prefixed string is unicode
         if isinstance(s, unicode):
-            return C.ST_UNICODE
+            return C._ST_UNICODE_
         elif isinstance(s, str): # same as isinstance(v, bytes)
-            return C.ST_LITERAL | C.ST_BYTES
+            return C._ST_LITERAL_ | C._ST_BYTES_
     else:
         # in py3, 
         # a literal string is str (i.e: unicode encoded)
         # a u-prefixed string is str
         # a utf8 string is bytes
         if isinstance(s, bytes):
-            return C.ST_BYTES
+            return C._ST_BYTES_
         elif isinstance(s, str):
-            return C.ST_LITERAL | C.ST_UNICODE
+            return C._ST_LITERAL_ | C._ST_UNICODE_
 
-    return C.ST_UNDEFINED
+    return C._ST_UNDEFINED_
 
 
 def is_newline_obj(o):

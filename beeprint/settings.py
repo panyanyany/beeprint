@@ -10,21 +10,30 @@ import types
 from . import constants as C
 from . import utils
 
-outfile = sys.stdout
+# >> coding
 encoding = 'utf-8'
-maxDeep = 5
+
+# >> representation
+max_depth = 5
 leading = u'  '
 newline = False
-write_to_buffer_when_execute = False
-bufferHandle = sys.stdout
 tuple_in_line = True
 list_in_line = True
+
+# >> buffer
+buffer_handler = sys.stdout
+# use buffer_handler.flush() every print
+write_to_buffer_when_execute = False
+
+# >> class controll
 # 过滤以 x 开头的属性
 prop_leading_filters = ["__", "func_"]
 # 根据类型过滤对象的属性
 prop_filters = [utils.is_pan_function, 'im_func', 'im_self', 'im_class']
 
 # >> 优先策略
+# to raise exception or not when errors happened
+# _PS_CONTENT_FIRST will keep content printing despite of any error
 priority_strategy = C._PS_CONTENT_FIRST
 
 # debug = False
