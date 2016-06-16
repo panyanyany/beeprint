@@ -6,18 +6,18 @@ from __future__ import division
 import sys
 import traceback
 import types
+import inspect
 
-if sys.version_info < (3, 0):
+from .utils import pyv
+
+if pyv == 2:
     # avoid throw [UnicodeEncodeError: 'ascii' codec can't encode characters]
     # exceptions, without these lines, the sys.getdefaultencoding() returns ascii
     from imp import reload
     reload(sys)
     sys.setdefaultencoding('utf-8')
-
-    pyv = 2
 else:
     unicode = str
-    pyv = 3
 
 from . import settings as S
 from . import constants as C
@@ -32,17 +32,19 @@ def object_attr_default_filter(obj, name, val):
             return True
 
     for prop in S.prop_filters:
-        # filter is a type
-        if type(prop) == types.TypeType:
-            if type(val) == prop:
-                return True
         # filter is a string
-        elif isinstance(prop, basestring) or isinstance(prop, str):
+        if isinstance(prop, str) or isinstance(prop, unicode):
             if name == prop:
+                return True
+        # filter is a type
+        # if type(prop) == types.TypeType:
+        if isinstance(prop, type):
+            if type(val) == prop:
                 return True
         # filter is callable
         elif hasattr(prop, '__call__'):
-            return prop(name, val)
+            if prop(name, val):
+                return True
 
     return False
 
@@ -53,8 +55,8 @@ def dict_key_filter(obj, name, val):
 
 def _b(s):
     if S.write_to_buffer_when_execute:
-        S.bufferHandle.write(s)
-        S.bufferHandle.flush()
+        S.buffer_handler.write(s)
+        S.buffer_handler.flush()
     return s
 
 def pstr(s):
@@ -132,22 +134,24 @@ def tail_symbol(position):
             position & C._AS_DICT_ELEMENT_ or
             position & C._AS_CLASS_ELEMENT_ or
             position & C._AS_TUPLE_ELEMENT_):
-        tail = ','
+        tail = u','
     else:
-        tail = ''
+        tail = u''
     return tail
 
 
 def build_single_block(obj, leadCnt=0, position=C._AS_ELEMENT_):
     '遍历对象，判断对象内成员的类型，然后调用对应的 build_*_block() 处理'
 
-    debug(0, leadCnt, 'ready to build %s:%s' % (type(obj), obj))
+    debug(C._DL_FUNC_, leadCnt, 
+          ('obj:%s leadCnt:%s position:%d' \
+           % (obj, leadCnt, position)))
 
     ret = pstr('')
 
     tail = tail_symbol(position)
 
-    if S.maxDeep < leadCnt:
+    if S.max_depth < leadCnt:
         if S.newline or position & C._AS_ELEMENT_:
             ret = pstr(leadCnt * S.leading) + pstr("<OUT OF RANGE>\n")
         else:
@@ -157,20 +161,20 @@ def build_single_block(obj, leadCnt=0, position=C._AS_ELEMENT_):
         return _b(ret)
 
     if isinstance(obj, dict):
-        debug(0, leadCnt, 'is dict')
+        debug(C._DL_STATEMENT, leadCnt, 'is dict')
         ret += build_dict_block(obj, leadCnt, position)
     elif isinstance(obj, list):
-        debug(0, leadCnt, 'is list')
+        debug(C._DL_STATEMENT, leadCnt, 'is list')
         ret += build_list_block(obj, leadCnt, position)
     elif isinstance(obj, tuple):
-        debug(0, leadCnt, 'is tuple')
+        debug(C._DL_STATEMENT, leadCnt, 'is tuple')
         ret += build_tuple_block(obj, leadCnt, position)
     # hasattr(obj, '__dict__') or isinstance(obj, object):
     elif is_extendable(obj):
-        debug(0, leadCnt, 'is extendable')
+        debug(C._DL_STATEMENT, leadCnt, 'is extendable')
         ret += build_class_block(obj, leadCnt, position)
     else:
-        debug(0, leadCnt, 'is simple type')
+        debug(C._DL_STATEMENT, leadCnt, 'is simple type')
         ret += _b(leadCnt * S.leading + typeval(obj) + pstr(tail + '\n'))
 
     return ret
@@ -182,24 +186,42 @@ def is_extendable(obj):
 
 
 def build_pair_block(name, val, leadCnt=0, position=C._AS_ELEMENT_):
+    debug(C._DL_FUNC_, leadCnt, 
+          ('key:%s, leadCnt:%s, position:%s' \
+           % (name, leadCnt, position)))
     ret = pstr('')
 
     tail = tail_symbol(position)
 
-    ret += _b(S.leading * leadCnt + typeval(name) + ':')
-    if is_extendable(val) and S.maxDeep > leadCnt:
-        if S.newline or isinstance(val, (types.InstanceType, types.FunctionType)):
+    if position & C._AS_CLASS_ELEMENT_:
+        # class method name or attribute name no need to add u or b prefix
+        name = pstr(name)
+    else:
+        name = typeval(name)
+    ret += _b(S.leading * leadCnt + name + ':')
+    if is_extendable(val) and S.max_depth > leadCnt:
+        # value need to be dispalyed on new line
+        # including: 
+        #   class type & class instance
+        #   function type
+        if S.newline or (is_newline_obj(val) & 
+                         position & C._AS_ELEMENT_):
             ret += _b(pstr('\n'))
             leadCnt = leadCnt + 1
+            position |= C._AS_ELEMENT_
+            debug(C._DL_STATEMENT, leadCnt, 'make newline')
+        # value will be dispalyed immediately after one space
         else:
             ret += _b(pstr(" "))
+            position |= C._AS_VALUE_
 
-        ret += build_single_block(val, leadCnt, C._AS_VALUE_)
+        ret += build_single_block(val, leadCnt, position)
     else:
-        if S.maxDeep <= leadCnt:
+        if S.max_depth <= leadCnt:
             ret += _b(pstr(" <OUT OF RANGE>%s\n" % tail))
         else:
             ret += _b(pstr(" ") + typeval(val) + pstr(tail + '\n'))
+
     return ret
 
 
@@ -248,6 +270,8 @@ def build_tuple_block(o, leadCnt=0, position=C._AS_VALUE_):
         _f = map(lambda e: not is_extendable(e), o)
         if all(_f):
             _o = map(lambda e: typeval(e), o)
+            if S.newline or position & C._AS_ELEMENT_:
+                ret += pstr(S.leading * leadCnt)
             ret += _b(pstr("(") + ', '.join(_o) + ')%s\n' % tail)
             return ret
 
@@ -279,29 +303,47 @@ def build_dict_block(o, leadCnt=0, position=C._AS_VALUE_):
         ret += _b(pstr('{') + pstr('\n'))
 
     # body
-    for k in o:
-        v = o[k]
+    for k, v in o.items():
+        # v = o[k]
         if dict_key_filter(o, k, v):
             continue
         #ret += S.leading*(leadCnt + 1) + typeval(k) + pstr(": ")
         #ret += build_single_block(v, leadCnt+1)
-        ret += build_pair_block(k, v, leadCnt + 1)
+        ret += build_pair_block(k, v, leadCnt + 1, C._AS_DICT_ELEMENT_)
 
     # }
-    ret += _b(S.leading * leadCnt + '}' + pstr(tail + '\n'))
+    ret += _b(S.leading * leadCnt + '}' + pstr(tail + u'\n'))
 
     return ret
 
 
 def build_class_block(o, leadCnt=0, position=C._AS_ELEMENT_):
+
+    debug(C._DL_FUNC_, leadCnt, 
+          ('obj:%s leadCnt:%s position:%d' \
+           % (o, leadCnt, position)))
     ret = pstr('')
 
-    # {
-    _leading = S.leading * leadCnt
+    tail = tail_symbol(position)
 
-    if hasattr(o, '__class__'):
-        ret += _b(_leading + pstr('object(%s):' %
+    # {
+    _leading = pstr('')
+    if position & C._AS_ELEMENT_:
+        _leading += S.leading * leadCnt
+    # elif position & C._AS_DICT_ELEMENT_:
+    #     _leading += pstr(' ')
+    elif position & C._AS_VALUE_:
+        _leading += pstr('')
+
+    if is_class_instance(o):
+        ret += _b(_leading + pstr('instance(%s):' %
                                   o.__class__.__name__) + pstr('\n'))
+    elif inspect.isfunction(o):
+        ret += _b(_leading + pstr('function(%s):' % o.__name__) + pstr('\n'))
+    elif inspect.isbuiltin(o):
+        ret += _b(_leading + pstr('builtin(%s):' % o.__name__) + pstr('\n'))
+    elif inspect.ismethod(o):
+        ret += _b(_leading + pstr('method(%s):' % o.__name__) + pstr('\n'))
     else:
         '本身就是类，不是对象'
         ret += _b(_leading + pstr('class(%s):' % o.__name__) + pstr('\n'))
@@ -330,32 +372,47 @@ def build_class_block(o, leadCnt=0, position=C._AS_ELEMENT_):
             position = C._AS_CLASS_ELEMENT_
 
         #'忽略掉 以__开头的成员、自引用成员、函数成员'
-        ret += build_pair_block(attr, val, leadCnt + 1, position)
-
-    ret += pstr((leadCnt + 1) * S.leading) + \
-        pstr("<filter %d props>\n" % filter_count)
+        ret += build_pair_block(attr, 
+                                val, 
+                                leadCnt + 1, 
+                                position | C._AS_CLASS_ELEMENT_)
 
     # }
-    #ret += S.leading*leadCnt + '}' + pstr('\n')
+    if filter_count == props_cnt:
+        # right strip ':\n'
+        ret = ret[:-2]
+    else:
+        # right strip ',\n' which belongs to last element of class
+        ret = ret[:-2]
+
+    ret += pstr(tail + u'\n')
     return ret
 
 
 def typeval(v):
     try:
-        st = string_type(v)
-        ret = u''
-        if st == C.ST_LITERAL:
-            ret = u'"' + pstr(v) + u'"'
-        elif st == C.ST_UNICODE:
-            ret = u"u'" + v + u"'"
-        elif st == C.ST_BYTES:
-            # in py3, printed string will enclose with b''
-            ret = pstr(v)
-        else:
-            ret = pstr(v)
+        if S.united_str_coding_representation:
+            st = string_type(v)
+            ret = u''
+            if st & C._ST_UNICODE_ != 0:
+                if S.str_display_not_prefix_u:
+                    ret = u"'" + v + u"'"
+                else:
+                    ret = u"u'" + v + u"'"
+            elif st & C._ST_BYTES_ != 0:
+                # in py3, printed string will enclose with b''
+                # ret = pstr(v)
+                if S.str_display_not_prefix_b:
+                    ret = u"'" + v.decode(S.encoding) + u"'"
+                else:
+                    ret = u"b'" + v.decode(S.encoding) + u"'"
+            else:
+                ret = pstr(v)
 
-        ret = ret.replace(u'\n', u'\\n')
-        ret = ret.replace(u'\r', u'\\r')
+            ret = ret.replace(u'\n', u'\\n')
+            ret = ret.replace(u'\r', u'\\r')
+        else:
+            ret = u'<YOU HAVE SET S.united_str_coding_representation TO True>'
 
     except Exception as e:
         if S.priority_strategy == C._PS_CORRECTNESS_FIRST:
@@ -372,19 +429,58 @@ def string_type(s):
 
     if pyv == 2:
         # in py2, string literal is both instance of str and bytes
-        # a literal string is str
-        # a utf8 string is str
+        # a literal string is str (i.e: coding encoded, eg: utf8)
         # a u-prefixed string is unicode
         if isinstance(s, unicode):
-            return C.ST_UNICODE
+            return C._ST_UNICODE_
         elif isinstance(s, str): # same as isinstance(v, bytes)
-            return C.ST_LITERAL
+            return C._ST_LITERAL_ | C._ST_BYTES_
     else:
         # in py3, 
-        # a literal string is str
+        # a literal string is str (i.e: unicode encoded)
         # a u-prefixed string is str
         # a utf8 string is bytes
         if isinstance(s, bytes):
-            return C.ST_BYTES
+            return C._ST_BYTES_
         elif isinstance(s, str):
-            return C.ST_LITERAL
+            return C._ST_LITERAL_ | C._ST_UNICODE_
+
+    return C._ST_UNDEFINED_
+
+
+def is_newline_obj(o):
+    if hasattr(o, '__module__'):
+        return True
+    return False
+
+
+def is_class(o):
+    try:
+        # detect class
+        # for py3, to detect both old-style and new-style class
+        # for py2, to detect new-style class
+        o.__flags__
+        return True
+    except:
+        if inspect.isclass(o):
+            return True
+    return False
+
+
+def is_class_instance(o):
+    try:
+        # to detect:
+        # old-style class & new-style class
+        # instance of old-style class and of new-style class
+        # method of instance of both class
+        # function
+        o.__module__
+
+        if (inspect.isclass(o) 
+                or inspect.isfunction(o)
+                or inspect.ismethod(o)):
+            return False
+        return True
+    except:
+        pass
+    return False

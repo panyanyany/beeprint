@@ -1,20 +1,3 @@
-beeprint: Beautifully Print
-===
-pprint is good, but not clean. So beeprint do it.
-
-Features
-===
-- print dict elegantly
-- format of sequential type is controllable
-- outstanding mark to class and instance
-- compatible with py2 py3 in same output
-
-Examples
-===
-
-Complicated data
----
-```
 [
   1,
   1.1,
@@ -49,5 +32,3 @@ Complicated data
     },
   },
 ]
-```
-

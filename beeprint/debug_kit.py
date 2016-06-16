@@ -5,6 +5,7 @@ from __future__ import unicode_literals
 from __future__ import division
 from . import settings as S
 from . import constants as C
+import inspect
 
 
 ### global variables
@@ -16,7 +17,12 @@ def add_leading(depth, text):
     return text
 
 def debug(level, depth, text):
-    if S.debug is False:
-        return
-    text = add_leading(depth, text)
-    print(text)
+    if S.debug_level >= level:
+        frame_list = inspect.stack()
+        caller_name = frame_list[1][3]
+        depth = len(frame_list) - 4
+        if level == C._DL_FUNC_:
+            depth -= 1
+            text = caller_name + ': ' + text
+        text = add_leading(depth, text)
+        print(text)

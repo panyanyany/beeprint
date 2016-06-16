@@ -13,3 +13,9 @@ register:
 
 full:
 	python setup.py sdist bdist_egg upload
+
+test27:
+	python2.7 -m unittest discover tests || true
+
+test35:
+	python3.5 -m unittest discover tests || true
