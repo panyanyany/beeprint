@@ -18,30 +18,6 @@ class NormalClassNewStyle(object):
 inst_of_normal_class_old_style = NormalClassOldStyle()
 inst_of_normal_class_new_style = NormalClassNewStyle()
 
-values = [
-    1,
-    1.1,
-    "s",
-    u"us",
-    "a中文",
-    u"a中文",
-    [1],
-    (1,2),
-    EmptyFunc,
-    EmptyClassOldStyle,
-    EmptyClassNewStyle,
-    NormalClassOldStyle,
-    NormalClassNewStyle,
-    inst_of_normal_class_old_style,
-    inst_of_normal_class_new_style,
-    inst_of_normal_class_old_style.mth,
-    inst_of_normal_class_new_style.mth,
-    {
-        'key': [],
-        u'key2': {},
-    },
-]
-
 long_text_en = """
 The sky and the earth were at first one blurred1 entity2 like an egg. Pangu was born into it.
  
@@ -66,4 +42,39 @@ long_text_in_list = [
 long_text_in_dict = [
     {"english version": long_text_en},
     {"simplify chinese versino": long_text_cn},
+]
+
+out_of_range = [
+    [1, [2.1, ['2.2.1', ['2.2.2.1']]]],
+    {
+        1: {
+            1.1: {
+                '1.1.1': "value",
+            },
+        },
+    },
+]
+
+values = [
+    1,
+    1.1,
+    "s",
+    u"us",
+    "a中文",
+    u"a中文",
+    [1],
+    (1,2),
+    EmptyFunc,
+    EmptyClassOldStyle,
+    EmptyClassNewStyle,
+    NormalClassOldStyle,
+    NormalClassNewStyle,
+    inst_of_normal_class_old_style,
+    inst_of_normal_class_new_style,
+    inst_of_normal_class_old_style.mth,
+    inst_of_normal_class_new_style.mth,
+    {
+        'key': [],
+        u'key2': {},
+    },
 ]

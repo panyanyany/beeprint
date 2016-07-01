@@ -82,6 +82,18 @@ class TestSimpleTypes(unittest.TestCase):
         self.assertEqual(res == ans or res == ans2, True)
         # self.assertEqual(res, ans)
 
+    '''
+    def test_out_of_range(self):
+        ans = u""
+        data_path = os.path.join(CUR_SCRIPT_PATH, 
+                                 'data/out_of_range.txt')
+        with codecs.open(data_path, encoding="utf8") as fp:
+            ans = fp.read()
+
+        self.assertEqual(beeprint(df.out_of_range, output=False), ans)
+    '''
+
+
     def test_long_text(self):
         pass
         # res = beeprint(long_text_en, output=False)

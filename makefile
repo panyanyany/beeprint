@@ -19,3 +19,8 @@ test27:
 
 test35:
 	python3.5 -m unittest discover tests || true
+
+vtest:
+	python3.5 tests/test_default_beeprint.py || true
+	python2.7 tests/test_default_beeprint.py || true
+

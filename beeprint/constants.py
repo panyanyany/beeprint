@@ -39,6 +39,7 @@ _DL_FUNC_ = 2
 _DL_STATEMENT = 3
 
 # long string 
-_LS_WRAP_BY_NONE = 0
-_LS_WRAP_BY_TERMINAL = 1
-_LS_WRAP_BY_80_COLUMN = 2
+_TEXT_WRAP_BY_NONE = 0
+_TEXT_WRAP_BY_TERMINAL = 1
+# accompany with S.text_wrap_width argument
+_TEXT_WRAP_BY_WIDTH = 2

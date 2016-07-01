@@ -22,4 +22,7 @@ setup(
         "Topic :: Software Development",
         "Topic :: Utilities",
     ],
+    install_requires=[
+        'urwid',
+    ],
 )
