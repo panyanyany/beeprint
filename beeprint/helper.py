@@ -13,7 +13,7 @@ from . import settings as S
 from .utils import pyv
 from .models import StringEncloser
 from .terminal_size import get_terminal_size
-from kitchen.text import display
+# from kitchen.text import display
 
 
 def typeval(context, v):
@@ -128,10 +128,13 @@ def string_handle(context, s, st):
     if width > 0:
         # seg_list = t.render((width,)).text
         seg_list = wrap_string(str_encloser.body, width)
-        # print(seg_list)
         indent_char_width = calc_width(S.leading)
         for i in xrange(1, len(seg_list)):
-            seg_list[i] = int(left_margin/indent_char_width)*S.leading + seg_list[i]
+            seg_list[i] = ''.join([
+                left_margin//indent_char_width*S.leading,
+                left_margin%2*u' ',
+                seg_list[i],
+            ])
         s = '\n'.join(seg_list)
 
     str_encloser.body = s

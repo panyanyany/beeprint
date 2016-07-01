@@ -19,11 +19,11 @@ inst_of_normal_class_old_style = NormalClassOldStyle()
 inst_of_normal_class_new_style = NormalClassNewStyle()
 
 long_text_en = """
-The sky and the earth were at first one blurred1 entity2 like an egg. Pangu was born into it.
+The sky and the earth were at first one blurred entity like an egg. Pangu was born into it.
  
-The separation of the sky and the earth took eighteen thousand years-the yang which was light and pure rose to become the sky, and the yin which was heavy and murky3（朦胧的） sank to form the earth. Between them was Pangu, who went through nine changes every day, his wisdom greater than that of the sky and his ability greater than that of the earth. Every day the sky rose ten feet higher, the earth became ten feet thicker, and Pangu grew ten feet taller.
+The separation of the sky and the earth took eighteen thousand years-the yang which was light and pure rose to become the sky, and the yin which was heavy and murky（朦胧的） sank to form the earth. Between them was Pangu, who went through nine changes every day, his wisdom greater than that of the sky and his ability greater than that of the earth. Every day the sky rose ten feet higher, the earth became ten feet thicker, and Pangu grew ten feet taller.
  
-Another eighteen thousand years passed, and there was an extremely high sky, an extremely thick earth, and an extremely tall Pangu. After Pangu died, his head turned into the Five Sacred Mountains (Mount4 Tai, Mount Heng, Mount Hua, Mount Heng, Mount Song), his eyes turned into the moon and the sun, his blood changed into water in river and sea, his hair into grass.
+Another eighteen thousand years passed, and there was an extremely high sky, an extremely thick earth, and an extremely tall Pangu. After Pangu died, his head turned into the Five Sacred Mountains (Mount Tai, Mount Heng, Mount Hua, Mount Heng, Mount Song), his eyes turned into the moon and the sun, his blood changed into water in river and sea, his hair into grass.
  
 In all, the universe and Pangu combine in one.
 """

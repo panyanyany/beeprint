@@ -165,9 +165,9 @@ def build_pair_block(name, val, leadCnt=0, position=C._AS_ELEMENT_):
 
     tail = tail_symbol(position)
 
-    name = pair_block_key(position, name)
+    key = pair_block_key(position, name)
 
-    ret += _b(S.leading * leadCnt + name + ':')
+    ret += _b(S.leading * leadCnt + key + ':')
     if is_extendable(val) and S.max_depth > leadCnt:
         # value need to be dispalyed on new line
         # including: 
