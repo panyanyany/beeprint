@@ -11,7 +11,6 @@ import urwid
 from . import constants as C
 from . import settings as S
 from .utils import pyv
-from .models import StringEncloser
 from .terminal_size import get_terminal_size
 # from kitchen.text import display
 
@@ -64,6 +63,11 @@ def long_string_wrapper(ls, how):
     pass
 
 def tail_symbol(position):
+    """calculate the tail of block
+    newline character does not include here because
+    when your calculate the length of whole line you only need to be
+    care about printable characters
+    """
     if (position & C._AS_LIST_ELEMENT_ or
             position & C._AS_DICT_ELEMENT_ or
             position & C._AS_CLASS_ELEMENT_ or
@@ -142,6 +146,7 @@ def string_handle(context, s, st):
     return str(str_encloser)
 
 def enclose_string(s, st):
+    from .models import StringEncloser
     str_encloser = StringEncloser(s)
 
     if st & C._ST_UNICODE_:
@@ -187,3 +192,36 @@ def too_long(leadCnt, position, obj):
     whole_line_x = len(indent_str) + len(body)
 
     return terminal_x - whole_line_x <= 0
+
+def object_attr_default_filter(obj, name, val):
+    '过滤不需要的对象属性'
+
+    for propLeading in S.prop_leading_filters:
+        if name.startswith(propLeading):
+            return True
+
+    for prop in S.prop_filters:
+        # filter is a string
+        if isinstance(prop, str) or isinstance(prop, unicode):
+            if name == prop:
+                return True
+        # filter is a type
+        # if type(prop) == types.TypeType:
+        if isinstance(prop, type):
+            if type(val) == prop:
+                return True
+        # filter is callable
+        elif hasattr(prop, '__call__'):
+            if prop(name, val):
+                return True
+
+    return False
+
+def dict_key_filter(obj, name, val):
+    return False
+
+def _b(s):
+    if S.write_to_buffer_when_execute:
+        S.buffer_handler.write(s)
+        S.buffer_handler.flush()
+    return s

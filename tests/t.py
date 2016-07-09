@@ -93,7 +93,7 @@ args = {
 
 def main():
     if len(sys.argv) == 1:
-        # S.debug_level = 9
+        S.debug_level = 9
         # S.str_display_not_prefix_u = False
         # S.str_display_not_prefix_b = False
 

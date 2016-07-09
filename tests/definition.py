@@ -14,6 +14,7 @@ class NormalClassNewStyle(object):
     static_props = 1
     lists = []
     dicts = {}
+    tupl = (1,2)
 
 inst_of_normal_class_old_style = NormalClassOldStyle()
 inst_of_normal_class_new_style = NormalClassNewStyle()
@@ -75,6 +76,8 @@ values = [
     inst_of_normal_class_new_style.mth,
     {
         'key': [],
-        u'key2': {},
     },
+    {
+        'key': inst_of_normal_class_new_style,
+    }
 ]

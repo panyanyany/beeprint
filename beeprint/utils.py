@@ -66,4 +66,26 @@ def print_exc_plus():
             except:
                 print("<ERROR WHILE PRINTING VALUE>")
 
+def is_newline_obj(o):
+    if hasattr(o, '__module__'):
+        return True
+    return False
 
+def is_class_instance(o):
+    try:
+        # to detect:
+        # old-style class & new-style class
+        # instance of old-style class and of new-style class
+        # method of instance of both class
+        # function
+
+        # o.__module__ in python 3.5 some instance has no this attribute
+
+        if (inspect.isclass(o)
+            or inspect.isfunction(o)
+            or inspect.ismethod(o)):
+            return False
+        return True
+    except:
+        pass
+    return False
