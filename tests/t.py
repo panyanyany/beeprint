@@ -28,6 +28,7 @@ else:
 
 from beeprint.printer import beeprint as pp, pyv
 from beeprint import settings as S 
+from beeprint import constants as C 
 
 try:
     from .definition import values
@@ -93,11 +94,12 @@ args = {
 
 def main():
     if len(sys.argv) == 1:
-        S.debug_level = 9
+        # S.debug_level = 9
         # S.str_display_not_prefix_u = False
         # S.str_display_not_prefix_b = False
 
         # S.max_depth = 3
+        S.text_wrap_method = C._TEXT_WRAP_BY_WIDTH
         pp(df.values)
         pp(df.long_text_in_dict)
         pp(df.long_text_in_list)

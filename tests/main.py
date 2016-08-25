@@ -11,11 +11,14 @@ sys.path.append(BEEPRINT_PATH)
 
 from beeprint.printer import beeprint, pyv
 from beeprint import settings as S
+from beeprint import constants as C
 
 try:
-    from .definition import values, long_text_en
+    from .definition import values
+    import definition as df
 except:
-    from definition import values, long_text_en
+    from definition import values
+    import definition as df
 
 
 class TestSimpleTypes(unittest.TestCase):
@@ -64,22 +67,18 @@ class TestSimpleTypes(unittest.TestCase):
     def test_complicate_data(self):
         # S.str_display_not_prefix_u = False
         # S.str_display_not_prefix_b = False
+        S.text_wrap_method = C._TEXT_WRAP_BY_WIDTH
 
         ans = u""
         data_path = os.path.join(CUR_SCRIPT_PATH, 
-                                 'data/tests_complicate_data.txt')
+                                 'data/all_in_one.txt')
         with codecs.open(data_path, encoding="utf8") as fp:
             ans = fp.read()
 
-        # to prevent comparing fail in unordered keys to dict
-        ans2 = u""
-        data_path = os.path.join(CUR_SCRIPT_PATH, 
-                                 'data/tests_complicate_data2.txt')
-        with codecs.open(data_path, encoding="utf8") as fp:
-            ans2 = fp.read()
-
         res = beeprint(values, output=False)
-        self.assertEqual(res == ans or res == ans2, True)
+        res += beeprint(df.long_text_in_dict, output=False)
+        res += beeprint(df.long_text_in_list, output=False)
+        self.assertEqual(res, ans)
         # self.assertEqual(res, ans)
 
     '''

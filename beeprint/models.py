@@ -166,18 +166,18 @@ class Block(object):
     def __str__(self):
         return self.build_block()
 
-    def get_block_ending(self):
+    def get_block_ending(self, value=None):
         ending = u'\n'
         if self.position & C._AS_VALUE_:
             ending = u''
+        if self.position & C._AS_CLASS_ELEMENT_:
+            'last element of class has no ending'
+            elements = self.parent.get_elements()
+            if elements.index(self.subject) == len(elements)-1:
+                ending = u''
         return ending
 
-    def get_line_ending(self):
-        """calculate the ending of line
-        newline character does not include here because
-        when your calculate the length of whole line you only need to be
-        care about printable characters
-        """
+    def get_element_ending(self, value=None):
         position = self.position
         tail = u''
         if position & C._AS_VALUE_:
@@ -188,10 +188,15 @@ class Block(object):
                 position & C._AS_TUPLE_ELEMENT_):
             tail = u','
 
-            if position & C._AS_CLASS_ELEMENT_:
+            if False:
+                pass
+            elif position & C._AS_CLASS_ELEMENT_:
+                'last element of class has no ending'
                 elements = self.parent.get_elements()
                 if elements.index(self.subject) == len(elements)-1:
                     tail = u''
+            elif is_extendable(value):
+                tail = u''
 
         return tail
 
@@ -213,7 +218,9 @@ class Block(object):
 
         ret = pstr('')
 
-        tail = self.get_line_ending()
+        tail = self.get_element_ending()
+        block_ending = u''
+        debug(C._DL_STATEMENT, leadCnt, 'tail, block_ending: ' + str([tail, block_ending]))
 
         if S.max_depth < leadCnt:
             if S.newline or position & C._AS_ELEMENT_:
@@ -226,16 +233,16 @@ class Block(object):
 
         if isinstance(obj, dict):
             debug(C._DL_STATEMENT, leadCnt, 'is dict')
-            ret += str(DictBlock(obj, self, position=position, indent=leadCnt))
+            ret += str(DictBlock(obj, self.parent, position=position, indent=leadCnt))
         elif isinstance(obj, list):
             debug(C._DL_STATEMENT, leadCnt, 'is list')
-            ret += str(ListBlock(obj, self, position=position, indent=leadCnt))
+            ret += str(ListBlock(obj, self.parent, position=position, indent=leadCnt))
         elif isinstance(obj, tuple):
             debug(C._DL_STATEMENT, leadCnt, 'is tuple')
-            ret += str(TupleBlock(obj, self, position=position, indent=leadCnt))
+            ret += str(TupleBlock(obj, self.parent, position=position, indent=leadCnt))
         elif is_extendable(obj):
             debug(C._DL_STATEMENT, leadCnt, 'is extendable')
-            ret += str(ClassBlock(obj, self, position=position, indent=leadCnt))
+            ret += str(ClassBlock(obj, self.parent, position=position, indent=leadCnt))
         else:
             debug(C._DL_STATEMENT, leadCnt, 'is simple type')
             context = Context(indent_char=S.leading, position=position, lead_cnt=leadCnt)
@@ -266,7 +273,7 @@ class ClassBlock(Block):
 
         return PositionDict(props)
 
-    def get_line_ending(self):
+    def get_element_ending(self):
         """A class block would have many nested elements,
         it would not know how its children respresent.
         for example: 
@@ -286,8 +293,10 @@ class ClassBlock(Block):
         """
         return u''
 
+    '''
     def get_block_ending(self):
         return u''
+    '''
 
     def build_block(self):
         leadCnt = self.indent_cnt
@@ -300,8 +309,9 @@ class ClassBlock(Block):
 
         ret = pstr('')
 
-        tail = self.get_line_ending()
-        ending = self.get_block_ending()
+        tail = self.get_element_ending()
+        block_ending = self.get_block_ending()
+        debug(C._DL_STATEMENT, leadCnt, 'tail, block_ending: ' + str([tail, block_ending]))
 
         # {
         _leading = pstr('')
@@ -354,7 +364,7 @@ class ClassBlock(Block):
             # right strip ':\n'
             ret = pstr(ret[:-2] + u',\n')
         else:
-            ret += pstr(tail + ending)
+            ret += pstr(tail + block_ending)
         return ret
 
 class DictBlock(Block):
@@ -374,8 +384,9 @@ class DictBlock(Block):
                   o, leadCnt, position)))
 
         ret = pstr('')
-        tail = self.get_line_ending()
+        tail = self.get_element_ending()
         block_ending = self.get_block_ending()
+        debug(C._DL_STATEMENT, leadCnt, 'tail, block_ending: ' + str([tail, block_ending]))
         # {
         if S.newline or position & C._AS_ELEMENT_:
             ret += _b(S.leading * leadCnt + pstr('{') + pstr('\n'))
@@ -411,8 +422,9 @@ class ListBlock(Block):
         position = self.position
         ret = pstr('')
 
-        tail = self.get_line_ending()
+        tail = self.get_element_ending()
         block_ending = self.get_block_ending()
+        debug(C._DL_STATEMENT, leadCnt, 'tail, block_ending: ' + str([tail, block_ending]))
 
         '所有元素显示在同一行'
         if S.list_in_line:
@@ -458,10 +470,15 @@ class TupleBlock(Block):
         o = self.subject
         position = self.position
 
+        debug(C._DL_FUNC_, 
+              leadCnt,
+              ('obj:{} leadCnt:{} position:{:b}'.format(
+                  o, leadCnt, position)))
         ret = pstr('')
 
-        tail = self.get_line_ending()
+        tail = self.get_element_ending()
         block_ending = self.get_block_ending()
+        debug(C._DL_STATEMENT, leadCnt, 'tail, block_ending: ' + str([tail, block_ending]))
 
         if S.tuple_in_line:
             _f = map(lambda e: not is_extendable(e), o)
@@ -503,8 +520,9 @@ class PairBlock(Block):
                   name, leadCnt, position)))
         ret = pstr('')
 
-        tail = self.get_line_ending()
-        ending = self.get_block_ending()
+        tail = self.get_element_ending(val)
+        block_ending = self.get_block_ending(val)
+        debug(C._DL_STATEMENT, leadCnt, 'tail, block_ending: ' + str([tail, block_ending]))
 
         key = pair_block_key(position, name)
 
@@ -518,25 +536,27 @@ class PairBlock(Block):
                                  position & C._AS_ELEMENT_):
                 ret += _b(pstr('\n'))
                 leadCnt = leadCnt + 1
-                position &= ~C._AS_VALUE_
-                position |= C._AS_ELEMENT_
+                # position &= ~C._AS_VALUE_
+                # position |= C._AS_ELEMENT_
+                position = C._AS_ELEMENT_
                 debug(C._DL_STATEMENT, leadCnt, 'make newline')
             # value will be dispalyed immediately after one space
             else:
                 ret += _b(pstr(" "))
-                position &= ~C._AS_ELEMENT_
-                position |= C._AS_VALUE_
+                # position &= ~C._AS_ELEMENT_
+                # position |= C._AS_VALUE_
+                position = C._AS_VALUE_
 
-            ret += str(Block(val, self, position=position, indent=leadCnt)) + pstr(tail + ending)
+            ret += str(Block(val, self, position=position, indent=leadCnt)) + pstr(tail + block_ending)
         else:
             if S.max_depth <= leadCnt:
-                ret += _b(pstr(" <OUT OF RANGE>" + tail + ending))
+                ret += _b(pstr(" <OUT OF RANGE>" + tail + block_ending))
             else:
                 context = Context(indent_char=S.leading, 
                                          position=position,
                                          lead_cnt=leadCnt,
                                          key=name)
-                ret += _b(pstr(" ") + typeval(context, val) + pstr(tail + ending))
+                ret += _b(pstr(" ") + typeval(context, val) + pstr(tail + block_ending))
 
         return ret
 
