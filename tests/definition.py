@@ -45,25 +45,24 @@ long_text_in_dict = [
     {"simplify chinese versino": long_text_cn},
 ]
 
-out_of_range = [
-    [1, [2.1, ['2.2.1', ['2.2.2.1']]]],
+short_list = [1, 2, 3, 4, 5, 6]
+complicated_list = [
+    1,
+    [2, ],
     {
-        1: {
-            1.1: {
-                '1.1.1': "value",
-            },
-        },
+        'key': 'val',
     },
 ]
 
 values = [
     1,
     1.1,
-    "s",
-    u"us",
-    "a中文",
-    u"a中文",
-    [1],
+    "literal",
+    u"unicode",
+    "literal中文",
+    u"unicode中文",
+    short_list,
+    complicated_list,
     (1,2),
     EmptyFunc,
     EmptyClassOldStyle,

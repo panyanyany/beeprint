@@ -1,11 +1,18 @@
 [
   1,
   1.1,
-  's',
-  'us',
-  'a中文',
-  'a中文',
-  [1],
+  'literal',
+  'unicode',
+  'literal中文',
+  'unicode中文',
+  [1, 2, 3, 4, 5, 6],
+  [
+    1,
+    [2],
+    {
+      'key': 'val',
+    },
+  ],
   (1, 2),
   function(EmptyFunc),
   class(EmptyClassOldStyle),
