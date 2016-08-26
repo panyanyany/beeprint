@@ -1,14 +1,14 @@
-from distutils.core import setup
+from setuptools import setup
 setup(
     name = 'beeprint',
     packages = ['beeprint'], # this must be the same as the name above
-    version = '0.1',
-    description = 'print object in beautiful format, like pprint',
+    version = '2.2.1',
+    description = 'make your debug printing more friendly',
     author = 'Yangyang Pan',
     author_email = '568397440@qq.com',
     url = 'https://github.com/panyanyany/beeprint', # use the URL to the github repo
     download_url = 'https://github.com/panyanyany/beeprint/archive/master.zip', # I'll explain this in a second
-    keywords = ['print', 'pprint', 'format'], # arbitrary keywords
+    keywords = ['print', 'pprint', 'format', 'debug'], # arbitrary keywords
     classifiers = [
         "Programming Language :: Python",
         "Programming Language :: Python :: 2",
@@ -22,7 +22,7 @@ setup(
         "Topic :: Software Development",
         "Topic :: Utilities",
     ],
-    install_requires=[
+    install_requires = [
         'urwid',
     ],
 )

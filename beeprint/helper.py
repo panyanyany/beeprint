@@ -10,9 +10,12 @@ import urwid
 
 from . import constants as C
 from . import settings as S
-from .utils import pyv
+from .utils import pyv, _unicode
 from .terminal_size import get_terminal_size
 # from kitchen.text import display
+
+if pyv == 3:
+    xrange = range
 
 
 def typeval(context, v):
@@ -46,7 +49,7 @@ def pstr(s):
     '''
     res = u''
 
-    if isinstance(s, unicode):
+    if isinstance(s, _unicode):
         res += s
     elif isinstance(s, str):
         # in python 2/3, it's utf8
@@ -82,7 +85,7 @@ def string_type(s):
         # in py2, string literal is both instance of str and bytes
         # a literal string is str (i.e: coding encoded, eg: utf8)
         # a u-prefixed string is unicode
-        if isinstance(s, unicode):
+        if isinstance(s, _unicode):
             return C._ST_UNICODE_
         elif isinstance(s, str):  # same as isinstance(v, bytes)
             return C._ST_LITERAL_ | C._ST_BYTES_
@@ -139,7 +142,7 @@ def string_handle(context, s, st):
                 left_margin%2*u' ',
                 seg_list[i],
             ])
-        s = '\n'.join(seg_list)
+        s = "\n".join(seg_list)
 
     str_encloser.body = s
             
@@ -172,6 +175,10 @@ def wrap_string(s, width):
     t = urwid.Text(s)
     seg_list = t.render((width,)).text
     seg_list = [seg.rstrip() for seg in seg_list]
+    if pyv == 3:
+        # seg is the type of <class 'bytes'> in py3
+        # seg is the type of <type 'str'> in py2
+        seg_list = [seg.decode('utf8') for seg in seg_list]
     return seg_list
 
 def is_extendable(obj):
@@ -202,7 +209,7 @@ def object_attr_default_filter(obj, name, val):
 
     for prop in S.prop_filters:
         # filter is a string
-        if isinstance(prop, str) or isinstance(prop, unicode):
+        if isinstance(prop, str) or isinstance(prop, _unicode):
             if name == prop:
                 return True
         # filter is a type

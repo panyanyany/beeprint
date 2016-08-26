@@ -18,8 +18,6 @@ if pyv == 2:
 
     reload(sys)
     sys.setdefaultencoding('utf-8')
-else:
-    unicode = str
 
 from . import settings as S
 from . import constants as C
