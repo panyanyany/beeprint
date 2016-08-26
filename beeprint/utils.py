@@ -7,8 +7,6 @@ import inspect
 import sys
 import types
 
-from . import constants as C
-
 
 if sys.version_info < (3, 0):
     pyv = 2
@@ -35,7 +33,59 @@ def is_pan_function(name, val):
     """
     return inspect.isfunction(val) or inspect.ismethod(val)
 
-def long_string_wrapper(ls, how):
-    if how == C._LS_WRAP_BY_80_COLUMN:
+def print_exc_plus():
+    """
+    Print the usual traceback information, followed by a listing of all the
+    local variables in each frame.
+    """
+    tb = sys.exc_info()[2]
+    while 1:
+        if not tb.tb_next:
+            break
+        tb = tb.tb_next
+    stack = []
+    f = tb.tb_frame
+    while f:
+        stack.append(f)
+        f = f.f_back
+    stack.reverse()
+    traceback.print_exc()
+    print("Locals by frame, innermost last")
+    for frame in stack:
+        print()
+        print("Frame %s in %s at line %s" % (frame.f_code.co_name,
+                                             frame.f_code.co_filename,
+                                             frame.f_lineno))
+        for key, value in frame.f_locals.items():
+            print("\t%20s = " % key, end='')
+            # We have to be careful not to cause a new error in our error
+            # printer! Calling str() on an unknown object could cause an
+            # error we don't want.
+            try:
+                print(value)
+            except:
+                print("<ERROR WHILE PRINTING VALUE>")
+
+def is_newline_obj(o):
+    if hasattr(o, '__module__'):
+        return True
+    return False
+
+def is_class_instance(o):
+    try:
+        # to detect:
+        # old-style class & new-style class
+        # instance of old-style class and of new-style class
+        # method of instance of both class
+        # function
+
+        # o.__module__ in python 3.5 some instance has no this attribute
+
+        if (inspect.isclass(o)
+            or inspect.isfunction(o)
+            or inspect.ismethod(o)):
+            return False
+        return True
+    except:
         pass
-    pass
+    return False
