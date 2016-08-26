@@ -11,9 +11,9 @@ Features
 
 Contents
 ===
-[Examples](#Examples)
-[Installation](#Installation)
-[Settings](#Settings)
+- [Examples](#examples)
+- [Installation](#installation)
+- [Settings](#settings)
 
 Examples
 ===
