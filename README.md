@@ -1,13 +1,13 @@
-beeprint: Beautifully Print
+beeprint
 ===
-pprint is good, but not clean. So beeprint do it.
+make your debug printing more friendly
 
 Features
 ===
 - print dict elegantly
+- auto wrap text, including English and Chinese
 - outstanding mark to class and instance
 - compatible with py2 py3
-- auto wrap text, including English and Chinese
 
 Contents
 ===
