@@ -1,3 +1,6 @@
 .*
 *.pyc
 __pycache__/
+beeprint.egg-info/*
+build/*
+dist/*

@@ -12,7 +12,9 @@ register:
 	python setup.py register -r pypitest || true
 
 full:
-	python setup.py sdist bdist_egg upload
+	python2.7 setup.py bdist_egg upload
+	python3.5 setup.py bdist_egg upload
+	python setup.py sdist upload
 
 test27:
 	python2.7 -m unittest discover tests || true

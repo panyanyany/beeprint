@@ -8,10 +8,13 @@ import sys
 import types
 
 
+_unicode = None
 if sys.version_info < (3, 0):
     pyv = 2
+    _unicode = unicode
 else:
     pyv = 3
+    _unicode = str
 
 def is_class_method(name, val):
     if pyv == 2:
