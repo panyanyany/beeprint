@@ -4,12 +4,14 @@ import unittest
 import os
 import sys
 import codecs
+import re
 
 CUR_SCRIPT_PATH = os.path.dirname(os.path.abspath(__file__))
 BEEPRINT_PATH = os.path.abspath(os.path.join(CUR_SCRIPT_PATH, '..'))
 sys.path.append(BEEPRINT_PATH)
 
-from beeprint.printer import beeprint, pyv
+from beeprint.printer import pyv
+from beeprint import beeprint
 from beeprint import settings as S
 from beeprint import constants as C
 
@@ -81,16 +83,28 @@ class TestSimpleTypes(unittest.TestCase):
         self.assertEqual(res, ans)
         # self.assertEqual(res, ans)
 
-    '''
     def test_out_of_range(self):
-        ans = u""
-        data_path = os.path.join(CUR_SCRIPT_PATH, 
-                                 'data/out_of_range.txt')
-        with codecs.open(data_path, encoding="utf8") as fp:
-            ans = fp.read()
+        S.max_depth = 1
 
-        self.assertEqual(beeprint(df.out_of_range, output=False), ans)
-    '''
+        ans = ""
+        rel_path = ''
+        if pyv == 2:
+            rel_path = 'data/out_of_range_py2.txt'
+        else:
+            rel_path = 'data/out_of_range_py3.txt'
+        data_path = os.path.join(CUR_SCRIPT_PATH, rel_path)
+        with codecs.open(data_path, encoding='utf8') as fp:
+            ans = fp.read()
+        # delete object id, such as
+        # <definition.NormalClassOldStyle object at 0x7f2d9a61bac8>
+        ans, _ = re.subn("at 0x[\d\w]+", "", ans)
+
+        res = beeprint(df.values, output=False)
+        # delete object id, such as
+        # <definition.NormalClassOldStyle object at 0x7f2d9a61bac8>
+        res, _ = re.subn("at 0x[\d\w]+", "", res)
+        
+        self.assertEqual(res, ans)
 
 
     def test_long_text(self):

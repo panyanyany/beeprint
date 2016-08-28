@@ -49,14 +49,15 @@ def pstr(s):
     '''
     res = u''
 
+    if not isinstance(s, (_unicode, str)):
+        s = str(s)
+
     if isinstance(s, _unicode):
         res += s
     elif isinstance(s, str):
         # in python 2/3, it's utf8
         # so decode to unicode
         res += s.decode(S.encoding)
-    else:
-        res += str(s)  # .decode(S.encoding)
 
     return res
 
@@ -106,8 +107,11 @@ def string_handle(context, s, st):
     if st & C._ST_BYTES_:
         s = s.decode(S.encoding)
 
+    s = pstr(s)
+
     s = s.replace(u'\n', u'\\n')
     s = s.replace(u'\r', u'\\r')
+    s = s.replace(u'\t', u'\\t')
 
     left_margin = 0
     if context is not None:
@@ -146,7 +150,7 @@ def string_handle(context, s, st):
 
     str_encloser.body = s
             
-    return str(str_encloser)
+    return pstr(str_encloser)
 
 def enclose_string(s, st):
     from .models import StringEncloser
@@ -180,6 +184,15 @@ def wrap_string(s, width):
         # seg is the type of <type 'str'> in py2
         seg_list = [seg.decode('utf8') for seg in seg_list]
     return seg_list
+
+def cut_string(s, length):
+    t = urwid.Text(s)
+    seg_list = t.render((length,)).text
+    a_str = seg_list[0].rstrip().decode('utf8')
+    if pyv == 2:
+        # to unicode
+        a_str = a_str.decode('utf8')
+    return a_str
 
 def is_extendable(obj):
     '判断obj是否可以展开'
@@ -232,3 +245,15 @@ def _b(s):
         S.buffer_handler.write(s)
         S.buffer_handler.flush()
     return s
+
+def inline_msg(o):
+    if isinstance(o, (int, float, tuple, list, dict, bytes, str, _unicode)):
+        _msg = typeval(None, o)
+        msg = cut_string(_msg, 30)
+        more = _msg[len(msg):]
+        if len(more) > 0:
+            msg += u'...(len=%d)' % calc_width(_msg)
+    else:
+        msg = repr(o)
+
+    return msg

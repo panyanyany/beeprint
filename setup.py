@@ -2,7 +2,7 @@ from setuptools import setup
 setup(
     name = 'beeprint',
     packages = ['beeprint'], # this must be the same as the name above
-    version = '2.2.1',
+    version = '2.2.2',
     description = 'make your debug printing more friendly',
     author = 'Yangyang Pan',
     author_email = '568397440@qq.com',

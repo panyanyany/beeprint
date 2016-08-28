@@ -9,6 +9,7 @@ import os
 import sys
 import types
 import inspect
+import codecs
 
 
 CUR_SCRIPT_PATH = os.path.dirname(os.path.abspath(__file__))
@@ -98,11 +99,15 @@ def main():
         # S.str_display_not_prefix_u = False
         # S.str_display_not_prefix_b = False
 
-        # S.max_depth = 3
+        # S.max_depth = 1
+        tweet = {'coordinates': None, 'created_at': 'Mon Jun 27 19:32:19 +0000 2011', 'entities': {'hashtags': [], 'urls': [{'display_url': 'tumblr.com/xnr37hf0yz', 'expanded_url': 'http://tumblr.com/xnr37hf0yz', 'indices': [107, 126], 'url': 'http://t.co/cCIWIwg'}], 'user_mentions': []}, 'place': None, 'source': '<a href="http://www.tumblr.com/" rel="nofollow">Tumblr</a>', 'truncated': False, 'user': {'contributors_enabled': True, 'default_profile': False, 'entities': {'hashtags': [], 'urls': [], 'user_mentions': []}, 'favourites_count': 20, 'id_str': '6253282', 'profile_link_color': '0094C2'}}
+        tweet = {'entities': {'hashtags': [], 'urls': [{'display_url': 'tumblr.com/xnr37hf0yz', 'expanded_url': 'http://tumblr.com/xnr37hf0yz', 'indices': [107, 126], 'url': 'http://t.co/cCIWIwg'}], 'user_mentions': []}}
+        # pp(tweet)
         S.text_wrap_method = C._TEXT_WRAP_BY_WIDTH
         pp(df.values)
         pp(df.long_text_in_dict)
         pp(df.long_text_in_list)
+
         return
 
     for i in range(1, len(sys.argv)):

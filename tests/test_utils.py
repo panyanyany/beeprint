@@ -18,6 +18,7 @@ try:
 except:
     from definition import values, c, c2, ic, ic2, f
 
+
 class TestUtils(unittest.TestCase):
 
     def setUp(self):

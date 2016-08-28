@@ -10,6 +10,7 @@ import urwid
 import inspect
 
 from . import utils
+from . import helper
 from . import settings as S
 from . import constants as C
 from .debug_kit import debug
@@ -195,8 +196,9 @@ class Block(object):
                 elements = self.parent.get_elements()
                 if elements.index(self.subject) == len(elements)-1:
                     tail = u''
-            elif is_extendable(value):
+            elif is_class_instance(value) or utils.is_class(value):
                 tail = u''
+            # print('%s or %s: %s' % (is_class_instance(value), utils.is_class(value), value))
 
         return tail
 
@@ -222,11 +224,12 @@ class Block(object):
         block_ending = u''
         debug(C._DL_STATEMENT, leadCnt, 'tail, block_ending: ' + str([tail, block_ending]))
 
-        if S.max_depth < leadCnt:
+        if S.max_depth <= leadCnt:
+            imsg = helper.inline_msg(obj)
             if S.newline or position & C._AS_ELEMENT_:
-                ret = pstr(leadCnt * S.leading) + pstr("<OUT OF RANGE>\n")
+                ret = pstr(leadCnt * S.leading) + imsg + pstr("\n")
             else:
-                ret = pstr(" ") + pstr("<OUT OF RANGE>\n")
+                ret = pstr(" ") + imsg + pstr("\n")
             if position & C._AS_LIST_ELEMENT_:
                 ret = ret[:-1] + pstr(tail + "\n")
             return _b(ret)
@@ -438,9 +441,9 @@ class ListBlock(Block):
 
         # [
         if S.newline or position & C._AS_ELEMENT_:
-            ret += _b(S.leading * leadCnt + pstr('[') + block_ending)
+            ret += _b(S.leading * leadCnt + pstr('[') + pstr('\n'))
         else:
-            ret += _b(pstr('[') + block_ending)
+            ret += _b(pstr('[') + pstr('\n'))
 
         # body
         for e in o:
@@ -550,7 +553,7 @@ class PairBlock(Block):
             ret += str(Block(val, self, position=position, indent=leadCnt)) + pstr(tail + block_ending)
         else:
             if S.max_depth <= leadCnt:
-                ret += _b(pstr(" <OUT OF RANGE>" + tail + block_ending))
+                ret += _b(pstr(" " + helper.inline_msg(val) + tail + block_ending))
             else:
                 context = Context(indent_char=S.leading, 
                                          position=position,
