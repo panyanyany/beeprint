@@ -106,3 +106,4 @@ def is_class(o):
         return False
 
     return True
+

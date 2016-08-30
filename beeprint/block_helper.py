@@ -8,14 +8,14 @@ import sys
 import types
 
 from . import constants as C
-from .helper import pstr, typeval
+from .helper import ustr, typeval
 
 
 def pair_block_key(position, key):
     if position & C._AS_CLASS_ELEMENT_:
         # class method name or attribute name no need to add u or b prefix
-        key = pstr(key)
+        key = ustr(key)
     else:
-        key = typeval(None, key)
+        key = typeval(key)
 
     return key

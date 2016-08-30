@@ -16,8 +16,9 @@ from . import constants as C
 from .debug_kit import debug
 from .utils import is_newline_obj, is_class_instance
 from .helper import object_attr_default_filter, dict_key_filter, tail_symbol, _b
-from .helper import typeval, pstr, tail_symbol, is_extendable, too_long
+from .helper import typeval, ustr, tail_symbol, is_extendable, too_long
 from .block_helper import pair_block_key
+from .lib import search_up_tree as sut
 
 
 class Linizer(object):
@@ -218,7 +219,7 @@ class Block(object):
               ('obj:{} leadCnt:{} position:{:b}'.format(
                   obj, leadCnt, position)))
 
-        ret = pstr('')
+        ret = ustr('')
 
         tail = self.get_element_ending()
         block_ending = u''
@@ -227,11 +228,11 @@ class Block(object):
         if S.max_depth <= leadCnt:
             imsg = helper.inline_msg(obj)
             if S.newline or position & C._AS_ELEMENT_:
-                ret = pstr(leadCnt * S.leading) + imsg + pstr("\n")
+                ret = ustr(leadCnt * S.leading) + imsg + ustr("\n")
             else:
-                ret = pstr(" ") + imsg + pstr("\n")
+                ret = ustr(" ") + imsg + ustr("\n")
             if position & C._AS_LIST_ELEMENT_:
-                ret = ret[:-1] + pstr(tail + "\n")
+                ret = ret[:-1] + ustr(tail + "\n")
             return _b(ret)
 
         if isinstance(obj, dict):
@@ -249,7 +250,7 @@ class Block(object):
         else:
             debug(C._DL_STATEMENT, leadCnt, 'is simple type')
             context = Context(indent_char=S.leading, position=position, lead_cnt=leadCnt)
-            ret += _b(leadCnt * S.leading + typeval(context, obj) + pstr(tail + '\n'))
+            ret += _b(leadCnt * S.leading + typeval(obj, context) + ustr(tail + '\n'))
 
         return ret
 
@@ -310,34 +311,34 @@ class ClassBlock(Block):
               ('obj:{} leadCnt:{} position:{:b}'.format(
                   o, leadCnt, position)))
 
-        ret = pstr('')
+        ret = ustr('')
 
         tail = self.get_element_ending()
         block_ending = self.get_block_ending()
         debug(C._DL_STATEMENT, leadCnt, 'tail, block_ending: ' + str([tail, block_ending]))
 
         # {
-        _leading = pstr('')
+        _leading = ustr('')
         if position & C._AS_ELEMENT_:
             _leading += S.leading * leadCnt
         # elif position & C._AS_DICT_ELEMENT_:
-        #     _leading += pstr(' ')
+        #     _leading += ustr(' ')
         elif position & C._AS_VALUE_:
-            _leading += pstr('')
+            _leading += ustr('')
 
         if is_class_instance(o):
-            ret += _b(_leading + pstr('instance(%s):' %
-                                      o.__class__.__name__) + pstr('\n'))
+            ret += _b(_leading + ustr('instance(%s):' %
+                                      o.__class__.__name__) + ustr('\n'))
         elif inspect.isfunction(o):
-            ret += _b(_leading + pstr('function(%s):' % o.__name__) + pstr('\n'))
+            ret += _b(_leading + ustr('function(%s):' % o.__name__) + ustr('\n'))
         elif inspect.isbuiltin(o):
-            ret += _b(_leading + pstr('builtin(%s):' % o.__name__) + pstr('\n'))
+            ret += _b(_leading + ustr('builtin(%s):' % o.__name__) + ustr('\n'))
         elif inspect.ismethod(o):
-            ret += _b(_leading + pstr('method(%s):' % o.__name__) + pstr('\n'))
+            ret += _b(_leading + ustr('method(%s):' % o.__name__) + ustr('\n'))
         else:
             '本身就是类，不是对象'
             try:
-                ret += _b(_leading + pstr('class(%s):' % o.__name__) + pstr('\n'))
+                ret += _b(_leading + ustr('class(%s):' % o.__name__) + ustr('\n'))
             except:
                 print(inspect.isclass(o))
                 print(o, dir(o))
@@ -365,9 +366,9 @@ class ClassBlock(Block):
         # }
         if props_cnt == 0:
             # right strip ':\n'
-            ret = pstr(ret[:-2] + u',\n')
+            ret = ustr(ret[:-2] + u',\n')
         else:
-            ret += pstr(tail + block_ending)
+            ret += ustr(tail + block_ending)
         return ret
 
 class DictBlock(Block):
@@ -386,22 +387,22 @@ class DictBlock(Block):
               ('obj:{} leadCnt:{} position:{:b}'.format(
                   o, leadCnt, position)))
 
-        ret = pstr('')
+        ret = ustr('')
         tail = self.get_element_ending()
         block_ending = self.get_block_ending()
         debug(C._DL_STATEMENT, leadCnt, 'tail, block_ending: ' + str([tail, block_ending]))
         # {
         if S.newline or position & C._AS_ELEMENT_:
-            ret += _b(S.leading * leadCnt + pstr('{') + pstr('\n'))
+            ret += _b(S.leading * leadCnt + ustr('{') + ustr('\n'))
         else:
-            ret += _b(pstr('{') + pstr('\n'))
+            ret += _b(ustr('{') + ustr('\n'))
 
         # body
         for k, v in o.items():
             # v = o[k]
             if dict_key_filter(o, k, v):
                 continue
-            # ret += S.leading*(leadCnt + 1) + typeval(k) + pstr(": ")
+            # ret += S.leading*(leadCnt + 1) + typeval(k) + ustr(": ")
             # ret += build_single_block(v, leadCnt+1)
             ret += str(PairBlock((k, v),
                                  self, 
@@ -409,7 +410,7 @@ class DictBlock(Block):
                                  indent=leadCnt + 1))
 
         # }
-        ret += _b(S.leading * leadCnt + '}' + pstr(tail + block_ending))
+        ret += _b(S.leading * leadCnt + '}' + ustr(tail + block_ending))
 
         return ret
 
@@ -423,7 +424,7 @@ class ListBlock(Block):
         leadCnt = self.indent_cnt
         o = self.subject
         position = self.position
-        ret = pstr('')
+        ret = ustr('')
 
         tail = self.get_element_ending()
         block_ending = self.get_block_ending()
@@ -433,17 +434,17 @@ class ListBlock(Block):
         if S.list_in_line:
             _f = map(lambda e: not (is_extendable(e) or too_long(leadCnt, position, e)), o)
             if all(_f):
-                _o = map(lambda e: typeval(None, e), o)
+                _o = map(lambda e: typeval(e), o)
                 if S.newline or position & C._AS_ELEMENT_:
-                    ret += pstr(S.leading * leadCnt)
-                ret += pstr("[") + ', '.join(_o) + pstr("]" + tail + block_ending)
+                    ret += ustr(S.leading * leadCnt)
+                ret += ustr("[") + ', '.join(_o) + ustr("]" + tail + block_ending)
                 return _b(ret)
 
         # [
         if S.newline or position & C._AS_ELEMENT_:
-            ret += _b(S.leading * leadCnt + pstr('[') + pstr('\n'))
+            ret += _b(S.leading * leadCnt + ustr('[') + ustr('\n'))
         else:
-            ret += _b(pstr('[') + pstr('\n'))
+            ret += _b(ustr('[') + ustr('\n'))
 
         # body
         for e in o:
@@ -453,7 +454,7 @@ class ListBlock(Block):
                              ))
 
         # ]
-        ret += _b(S.leading * leadCnt + pstr(']' + tail + block_ending))
+        ret += _b(S.leading * leadCnt + ustr(']' + tail + block_ending))
 
         return ret
 
@@ -477,7 +478,7 @@ class TupleBlock(Block):
               leadCnt,
               ('obj:{} leadCnt:{} position:{:b}'.format(
                   o, leadCnt, position)))
-        ret = pstr('')
+        ret = ustr('')
 
         tail = self.get_element_ending()
         block_ending = self.get_block_ending()
@@ -486,17 +487,17 @@ class TupleBlock(Block):
         if S.tuple_in_line:
             _f = map(lambda e: not is_extendable(e), o)
             if all(_f):
-                _o = map(lambda e: typeval(None, e), o)
+                _o = map(lambda e: typeval(e), o)
                 if S.newline or position & C._AS_ELEMENT_:
-                    ret += pstr(S.leading * leadCnt)
-                ret += _b(pstr("(") + ', '.join(_o) + ')' + tail + block_ending)
+                    ret += ustr(S.leading * leadCnt)
+                ret += _b(ustr("(") + ', '.join(_o) + ')' + tail + block_ending)
                 return ret
 
         # (
         if S.newline or position & C._AS_ELEMENT_:
-            ret += _b(S.leading * leadCnt + pstr('(\n'))
+            ret += _b(S.leading * leadCnt + ustr('(\n'))
         else:
-            ret += _b(pstr('(\n'))
+            ret += _b(ustr('(\n'))
 
         # body
         for e in self.get_elements():
@@ -507,7 +508,7 @@ class TupleBlock(Block):
                              ))
 
         # )
-        ret += _b(S.leading * leadCnt + pstr(')' + tail + block_ending))
+        ret += _b(S.leading * leadCnt + ustr(')' + tail + block_ending))
 
         return ret
 
@@ -521,7 +522,7 @@ class PairBlock(Block):
         debug(C._DL_FUNC_, leadCnt,
               ('key:{}, leadCnt:{}, position:{:b}'.format(
                   name, leadCnt, position)))
-        ret = pstr('')
+        ret = ustr('')
 
         tail = self.get_element_ending(val)
         block_ending = self.get_block_ending(val)
@@ -537,7 +538,7 @@ class PairBlock(Block):
             #   function type
             if S.newline or (is_newline_obj(val) and
                                  position & C._AS_ELEMENT_):
-                ret += _b(pstr('\n'))
+                ret += _b(ustr('\n'))
                 leadCnt = leadCnt + 1
                 # position &= ~C._AS_VALUE_
                 # position |= C._AS_ELEMENT_
@@ -545,21 +546,21 @@ class PairBlock(Block):
                 debug(C._DL_STATEMENT, leadCnt, 'make newline')
             # value will be dispalyed immediately after one space
             else:
-                ret += _b(pstr(" "))
+                ret += _b(ustr(" "))
                 # position &= ~C._AS_ELEMENT_
                 # position |= C._AS_VALUE_
                 position = C._AS_VALUE_
 
-            ret += str(Block(val, self, position=position, indent=leadCnt)) + pstr(tail + block_ending)
+            ret += str(Block(val, self, position=position, indent=leadCnt)) + ustr(tail + block_ending)
         else:
             if S.max_depth <= leadCnt:
-                ret += _b(pstr(" " + helper.inline_msg(val) + tail + block_ending))
+                ret += _b(ustr(" " + helper.inline_msg(val) + tail + block_ending))
             else:
                 context = Context(indent_char=S.leading, 
                                          position=position,
                                          lead_cnt=leadCnt,
                                          key=name)
-                ret += _b(pstr(" ") + typeval(context, val) + pstr(tail + block_ending))
+                ret += _b(ustr(" ") + typeval(val, context) + ustr(tail + block_ending))
 
         return ret
 
@@ -596,3 +597,5 @@ class PositionDict(OrderedDict):
             idx = self.idx(key)
             yield idx, key, val
         #return self.indexed_items()
+
+

@@ -12,23 +12,27 @@ from . import constants as C
 from . import settings as S
 from .utils import pyv, _unicode
 from .terminal_size import get_terminal_size
+from .lib import search_up_tree as sut
 # from kitchen.text import display
 
 if pyv == 3:
     xrange = range
 
 
-def typeval(context, v):
+def typeval(v, context=None, type_editors=None):
+    if type_editors is None:
+        type_editors = {
+            C._ST_BYTES_ | C._ST_LITERAL_ | C._ST_UNICODE_: st_string_handler,
+            C._ST_UNDEFINED_: st_undefined_handler,
+        }
+
     try:
         if S.united_str_coding_representation:
-
             st = string_type(v)
             ret = u''
-            if st == C._ST_UNDEFINED_:
-                ret = pstr(v)
-            else:
-                ret = string_handle(context, v, st)
-
+            for stype, handler in type_editors.items():
+                if stype & st:
+                    ret = handler(v, st, context)
         else:
             ret = u'<YOU MUST SET S.united_str_coding_representation TO True>'
 
@@ -39,14 +43,12 @@ def typeval(context, v):
             raise e
         # S.priority_strategy == C._PS_CONTENT_FIRST:
         hx = v.decode("latin-1").encode("hex")
-        ret = pstr("<CAN NOT PARSE OBJECT(hex:" + hx + "):" + str(e) + ">")
+        ret = ustr("<CAN NOT PARSE OBJECT(hex:" + hx + "):" + str(e) + ">")
 
     return ret
 
-def pstr(s):
-    '''convert all string to unicode
-    for unicode is python's built-in coding
-    '''
+def ustr(s):
+    '''convert string into unicode'''
     res = u''
 
     if not isinstance(s, (_unicode, str)):
@@ -103,11 +105,15 @@ def string_type(s):
     return C._ST_UNDEFINED_
 
 
-def string_handle(context, s, st):
+def st_undefined_handler(obj, st, context=None):
+    return ustr(obj)
+
+
+def st_string_handler(s, st, context):
     if st & C._ST_BYTES_:
         s = s.decode(S.encoding)
 
-    s = pstr(s)
+    s = ustr(s)
 
     s = s.replace(u'\n', u'\\n')
     s = s.replace(u'\r', u'\\r')
@@ -150,7 +156,7 @@ def string_handle(context, s, st):
 
     str_encloser.body = s
             
-    return pstr(str_encloser)
+    return ustr(str_encloser)
 
 def enclose_string(s, st):
     from .models import StringEncloser
@@ -208,7 +214,7 @@ def too_long(leadCnt, position, obj):
     choas += '\''
 
     terminal_x = get_terminal_size()[0]
-    body = typeval(None, obj)
+    body = typeval(obj)
     whole_line_x = len(indent_str) + len(body)
 
     return terminal_x - whole_line_x <= 0
@@ -248,12 +254,14 @@ def _b(s):
 
 def inline_msg(o):
     if isinstance(o, (int, float, tuple, list, dict, bytes, str, _unicode)):
-        _msg = typeval(None, o)
+        'base types'
+        _msg = typeval(o)
         msg = cut_string(_msg, 30)
         more = _msg[len(msg):]
         if len(more) > 0:
             msg += u'...(len=%d)' % calc_width(_msg)
     else:
+        'class definitions or class instances'
         msg = repr(o)
 
     return msg

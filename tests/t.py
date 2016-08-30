@@ -107,6 +107,8 @@ def main():
         pp(df.values)
         pp(df.long_text_in_dict)
         pp(df.long_text_in_list)
+        S.max_depth = 1
+        pp(df.values)
 
         return
 

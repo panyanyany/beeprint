@@ -31,7 +31,7 @@ _AS_CLASS_ELEMENT_ = 1 << 4
 _ST_LITERAL_ = 1 # string literal depends on script's coding
 _ST_UNICODE_ = 2
 _ST_BYTES_ = 4
-_ST_UNDEFINED_ = 0
+_ST_UNDEFINED_ = 8
 
 # debug level
 _DL_MODULE_ = 1
