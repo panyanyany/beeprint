@@ -4,8 +4,6 @@ from __future__ import absolute_import
 from __future__ import unicode_literals
 from __future__ import division
 
-from collections import OrderedDict
-
 import urwid
 import inspect
 
@@ -19,71 +17,7 @@ from .helper import object_attr_default_filter, dict_key_filter, tail_symbol, _b
 from .helper import typeval, ustr, tail_symbol, is_extendable, too_long
 from .block_helper import pair_block_key
 from .lib import search_up_tree as sut
-
-
-class Linizer(object):
-    """ make a line of string to print """
-
-    left_quoter = "'"
-    right_quoter = "'"
-
-    seperator = ":"
-    after_seperator = " "
-
-    def __init__(self, position=None, lead_cnt=None, key=None, value=None):
-
-        self.position = position
-        self.lead_cnt = lead_cnt
-        self.key = key
-        self.value = value
-
-        self.value_left_brace = None
-        self.value_right_brace = None
-
-    def __str__(self):
-        joint = [
-            S.leading * self.lead_cnt,
-        ]
-        if self.key is not None:
-            joint += [
-                # self.left_quoter,
-                self.key,
-                # self.right_quoter,
-
-                self.seperator,
-            ]
-
-            if self.value is not None:
-                joint += [
-                    self.after_seperator,
-                ]
-
-        # value left brace
-        if self.value_left_brace is not None:
-            joint += [self.value_left_brace]
-
-        # value
-        if self.value is not None:
-            joint += [self.value]
-
-        # value right brace
-        if self.value_right_brace is not None:
-            joint += [self.value_right_brace]
-
-        # tail
-        if self.value is not None:
-            joint += [self.tail]
-
-        # new line
-        joint += [
-            '\n',
-        ]
-
-        return ''.join(joint)
-
-    @property
-    def tail(self):
-        return utils.tail_symbol(self.position)
+from .models import position_dict
 
 
 class Context(object):
@@ -94,7 +28,7 @@ class Context(object):
     seperator = ":"
     after_seperator = " "
 
-    def __init__(self, indent_char=None, position=None, lead_cnt=None, key=None, value=None):
+    def __init__(self, indent_char=None, position=None, lead_cnt=None, key=None, value=None, element_tail=None):
 
         self.indent_char = indent_char
         self.position = position
@@ -249,8 +183,21 @@ class Block(object):
             ret += str(ClassBlock(obj, self.parent, position=position, indent=leadCnt))
         else:
             debug(C._DL_STATEMENT, leadCnt, 'is simple type')
-            context = Context(indent_char=S.leading, position=position, lead_cnt=leadCnt)
-            ret += _b(leadCnt * S.leading + typeval(obj, context) + ustr(tail + '\n'))
+            context = Context(indent_char=S.leading, 
+                              position=position, 
+                              lead_cnt=leadCnt,
+                              element_tail=tail)
+            st_handler = None
+            if S.text_wrap_enable:
+                st_handler = StStringHandlerWrapper()
+            else:
+                st_handler = StStringHandler()
+            type_editors = {
+                C._ST_BYTES_ | C._ST_LITERAL_ | C._ST_UNICODE_: st_handler,
+                C._ST_UNDEFINED_: StUndefinedHandler(),
+            }
+
+            ret += _b(leadCnt * S.leading + typeval(obj, context, type_editors) + ustr(tail + '\n'))
 
         return ret
 
@@ -275,7 +222,7 @@ class ClassBlock(Block):
 
             props.append((attr_name, attr))
 
-        return PositionDict(props)
+        return position_dict.PositionDict(props)
 
     def get_element_ending(self):
         """A class block would have many nested elements,
@@ -402,8 +349,6 @@ class DictBlock(Block):
             # v = o[k]
             if dict_key_filter(o, k, v):
                 continue
-            # ret += S.leading*(leadCnt + 1) + typeval(k) + ustr(": ")
-            # ret += build_single_block(v, leadCnt+1)
             ret += str(PairBlock((k, v),
                                  self, 
                                  position=C._AS_DICT_ELEMENT_,
@@ -557,45 +502,11 @@ class PairBlock(Block):
                 ret += _b(ustr(" " + helper.inline_msg(val) + tail + block_ending))
             else:
                 context = Context(indent_char=S.leading, 
-                                         position=position,
-                                         lead_cnt=leadCnt,
-                                         key=name)
+                                  position=position, 
+                                  lead_cnt=leadCnt, 
+                                  key=name,
+                                  element_tail=tail)
                 ret += _b(ustr(" ") + typeval(val, context) + ustr(tail + block_ending))
 
         return ret
-
-
-class PositionDict(OrderedDict):
-
-    def __init__(self, tlist):
-        idx_by_key = {}
-        key_by_idx = {}
-        for idx, tup in enumerate(tlist):
-            key = tup[0]
-            idx_by_key[key] = idx
-            key_by_idx[idx] = key
-
-        self.idx_by_key = idx_by_key
-        self.key_by_idx = key_by_idx
-
-        super(PositionDict, self).__init__(tlist)
-
-    def idx(self, key):
-        return self.idx_by_key[key]
-
-    def indexed_items(self):
-        for key, val in super(PositionDict, self).items():
-            idx = self.idx(key)
-            yield idx, key, val
-
-    def index(self, pair):
-        return self.idx(pair[0])
-
-    def __iter__(self):
-        for key in super(PositionDict, self).__iter__():
-            val = self[key]
-            idx = self.idx(key)
-            yield idx, key, val
-        #return self.indexed_items()
-
 

@@ -9,7 +9,6 @@ import types
 import inspect
 
 from .utils import pyv
-import urwid
 
 if pyv == 2:
     # avoid throw [UnicodeEncodeError: 'ascii' codec can't encode characters]
@@ -21,11 +20,8 @@ if pyv == 2:
 
 from . import settings as S
 from . import constants as C
-from . import utils
 from .utils import print_exc_plus
-from . import models
-from .models import Block
-from .block_helper import pair_block_key
+from .models.block import Block
 
 
 def beeprint(o, output=True):

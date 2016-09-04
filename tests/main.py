@@ -99,7 +99,7 @@ class TestSimpleTypes(unittest.TestCase):
         # <definition.NormalClassOldStyle object at 0x7f2d9a61bac8>
         ans, _ = re.subn("at 0x[\d\w]+", "", ans)
 
-        res = beeprint(df.values, output=False)
+        res = beeprint(df.out_of_range, output=False)
         # delete object id, such as
         # <definition.NormalClassOldStyle object at 0x7f2d9a61bac8>
         res, _ = re.subn("at 0x[\d\w]+", "", res)
@@ -111,6 +111,22 @@ class TestSimpleTypes(unittest.TestCase):
         pass
         # res = beeprint(long_text_en, output=False)
         # self.assertEqual(res, ans)
+
+
+class TestLineBreak(unittest.TestCase):
+    
+    def setUp(self):
+        pass
+
+    def test_boundary_break(self):
+        rel_path = 'data/line_break/boundary_break.txt'
+        data_path = os.path.join(CUR_SCRIPT_PATH, rel_path)
+        with codecs.open(data_path, encoding='utf8') as fp:
+            ans = fp.read()
+
+        res = df.f_line_break_boundary(False)
+
+        self.assertEqual(ans, res)
 
 
 if __name__ == '__main__':

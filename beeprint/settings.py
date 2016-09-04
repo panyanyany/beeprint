@@ -52,6 +52,7 @@ str_display_escape_special_char = True
 element_display_last_with_comma = True
 
 # >> long string control
+text_wrap_enable = True
 text_wrap_method = C._TEXT_WRAP_BY_TERMINAL
 text_wrap_width = 80
 

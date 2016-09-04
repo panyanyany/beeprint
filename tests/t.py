@@ -93,6 +93,10 @@ args = {
     "builtin_test": builtin_test,
 }
 
+def out_of_range():
+    S.max_depth = 1
+    pp(df.out_of_range)
+
 def main():
     if len(sys.argv) == 1:
         # S.debug_level = 9
@@ -107,8 +111,7 @@ def main():
         pp(df.values)
         pp(df.long_text_in_dict)
         pp(df.long_text_in_list)
-        S.max_depth = 1
-        pp(df.values)
+        # df.f_line_break_boundary()
 
         return
 

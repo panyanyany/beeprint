@@ -1,4 +1,7 @@
 # -*- coding:utf-8 -*-
+from beeprint import settings as S 
+from beeprint import constants as C 
+from beeprint import beeprint as pp
 
 def EmptyFunc(): pass
 
@@ -84,5 +87,28 @@ values = [
     },
     {
         'key': inst_of_normal_class_new_style,
-    }
+    },
 ]
+
+v_line_break_boundary = [
+    {},
+    "boundary testing string: 80col,new line part filled with x ................",
+    "boundary testing string: 81col,new line part filled with x ............... x",
+    "boundary testing string: 82col,new line part filled with x ............... xx",
+]
+
+def f_line_break_boundary(output=True):
+    S.text_wrap_method = C._TEXT_WRAP_BY_WIDTH
+    return pp(v_line_break_boundary, output)
+
+
+out_of_range = [
+    'nomarl',
+    complicated_list,
+    EmptyFunc,
+    EmptyClassOldStyle,
+    EmptyClassNewStyle,
+    inst_of_normal_class_old_style,
+    inst_of_normal_class_new_style,
+]
+
