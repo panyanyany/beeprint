@@ -10,7 +10,7 @@ CUR_SCRIPT_PATH = os.path.dirname(os.path.abspath(__file__))
 BEEPRINT_PATH = os.path.abspath(os.path.join(CUR_SCRIPT_PATH, '..'))
 sys.path.append(BEEPRINT_PATH)
 
-from beeprint.printer import pyv
+from beeprint import pyv
 from beeprint import beeprint
 from beeprint import settings as S
 from beeprint import constants as C

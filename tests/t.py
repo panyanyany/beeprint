@@ -27,7 +27,7 @@ else:
     unicode = str
     pyv = 3
 
-from beeprint.printer import beeprint as pp, pyv
+from beeprint import beeprint as pp, pyv
 from beeprint import settings as S 
 from beeprint import constants as C 
 
