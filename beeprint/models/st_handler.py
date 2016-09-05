@@ -80,12 +80,20 @@ class StStringHandlerLines(StStringHandler):
                 self.context.element_tail,
             )
             indent_char_width = helper.calc_width(S.leading)
+            left_margin_chars = left_margin//indent_char_width*S.leading + left_margin%indent_char_width*u' '
             for i in range(1, len(seg_list)):
                 seg_list[i] = ''.join([
-                    left_margin//indent_char_width*S.leading,
-                    left_margin%2*u' ',
+                    left_margin_chars,
                     seg_list[i],
                 ])
+
+            if S.text_autoclip_enable and S.text_autoclip_method == C._TEXT_AUTOCLIP_BY_LINE:
+                lines_cnt = len(seg_list)
+                if lines_cnt > S.text_autoclip_maxline:
+                    seg_list = seg_list[:S.text_autoclip_maxline]
+                    hidden_lines = lines_cnt - S.text_autoclip_maxline
+                    plural_sign = '' if hidden_lines == 1 else 's'
+                    seg_list.append("%s...(%d hidden line%s)" % (left_margin_chars, hidden_lines, plural_sign))
             s = "\n".join(seg_list)
 
         return s

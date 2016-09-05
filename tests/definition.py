@@ -112,3 +112,16 @@ out_of_range = [
     inst_of_normal_class_new_style,
 ]
 
+clip_by_3_lines = [
+    'a'*(77*2 - 2),
+    'a'*77*2,
+    'a'*77*3,
+]
+
+
+def test_3lines_clip(output=True):
+    S.text_autoclip_enable = True
+    S.text_autoclip_method = C._TEXT_AUTOCLIP_BY_LINE
+    S.text_wrap_enable = True
+    S.text_wrap_method = C._TEXT_WRAP_BY_WIDTH
+    return pp(clip_by_3_lines, output)

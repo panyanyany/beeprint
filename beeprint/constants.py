@@ -43,3 +43,6 @@ _TEXT_WRAP_BY_NONE = 0
 _TEXT_WRAP_BY_TERMINAL = 1
 # accompany with S.text_wrap_width argument
 _TEXT_WRAP_BY_WIDTH = 2
+
+_TEXT_AUTOCLIP_BY_LINE = 1
+# _TEXT_AUTOCLIP_BY_LENGTH = 2

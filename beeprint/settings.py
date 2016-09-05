@@ -56,4 +56,11 @@ text_wrap_enable = True
 text_wrap_method = C._TEXT_WRAP_BY_TERMINAL
 text_wrap_width = 80
 
-# >> content overflow control
+# >> auto clip text
+text_autoclip_enable = True
+text_autoclip_method = C._TEXT_AUTOCLIP_BY_LINE
+# enabled if text_autoclip_method is _TEXT_AUTOCLIP_BY_LINE
+# and text_wrap_enable is True
+text_autoclip_maxline = 2
+# enabled if text_autoclip_method is _TEXT_AUTOCLIP_BY_LENGTH
+# text_autoclip_maxlength = 80

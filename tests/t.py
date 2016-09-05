@@ -108,10 +108,9 @@ def main():
         tweet = {'entities': {'hashtags': [], 'urls': [{'display_url': 'tumblr.com/xnr37hf0yz', 'expanded_url': 'http://tumblr.com/xnr37hf0yz', 'indices': [107, 126], 'url': 'http://t.co/cCIWIwg'}], 'user_mentions': []}}
         # pp(tweet)
         S.text_wrap_method = C._TEXT_WRAP_BY_WIDTH
-        pp(df.values)
-        pp(df.long_text_in_dict)
-        pp(df.long_text_in_list)
-        # df.f_line_break_boundary()
+        # pp(df.values)
+        # pp(df.long_text_in_dict)
+        # pp(df.long_text_in_list)
 
         return
 

@@ -70,6 +70,7 @@ class TestSimpleTypes(unittest.TestCase):
         # S.str_display_not_prefix_u = False
         # S.str_display_not_prefix_b = False
         S.text_wrap_method = C._TEXT_WRAP_BY_WIDTH
+        S.text_autoclip_enable = False
 
         ans = u""
         data_path = os.path.join(CUR_SCRIPT_PATH, 
@@ -127,6 +128,23 @@ class TestLineBreak(unittest.TestCase):
         res = df.f_line_break_boundary(False)
 
         self.assertEqual(ans, res)
+
+
+class TestAutoClip(unittest.TestCase):
+
+    def setUp(self):
+        pass
+
+    def test_3lines_clip(self):
+        rel_path = 'data/auto_clip/by_lines.txt'
+        data_path = os.path.join(CUR_SCRIPT_PATH, rel_path)
+        with codecs.open(data_path, encoding='utf8') as fp:
+            ans = fp.read()
+
+        res = df.test_3lines_clip(False)
+
+        self.assertEqual(ans, res)
+
 
 
 if __name__ == '__main__':
