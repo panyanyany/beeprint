@@ -252,6 +252,17 @@ class DictBlock(Block):
         kwargs.setdefault('position', C._AS_VALUE_)
         super(DictBlock, self).__init__(*args, **kwargs)
 
+    def get_elements(self):
+        if not S.dict_ordered_key_enable:
+            return self.subject.items()
+
+        def items(self):
+            keys = list(self.subject.keys())
+            keys.sort()
+            for k in keys:
+                yield k, self.subject[k]
+        return items(self)
+
     def build_block(self):
 
         leadCnt = self.indent_cnt
@@ -273,7 +284,7 @@ class DictBlock(Block):
             ret += _b(ustr('{') + ustr('\n'))
 
         # body
-        for k, v in o.items():
+        for k, v in self.get_elements():
             # v = o[k]
             if dict_key_filter(o, k, v):
                 continue

@@ -125,3 +125,24 @@ def test_3lines_clip(output=True):
     S.text_wrap_enable = True
     S.text_wrap_method = C._TEXT_WRAP_BY_WIDTH
     return pp(clip_by_3_lines, output)
+
+
+dict_multi_keys = {
+    'entities': {
+        'hashtags': [], 
+        'urls': [
+            {
+                'display_url': 'tumblr.com/xnr37hf0yz', 
+                'expanded_url': 'http://tumblr.com/xnr37hf0yz', 
+                'indices': [107, 126], 
+                'url': 'http://t.co/cCIWIwg'
+            }
+        ], 
+        'user_mentions': []
+    },
+}
+
+
+def test_dict_ordered_keys(output=True):
+    S.dict_ordered_key_enable = True
+    return pp(dict_multi_keys, output)

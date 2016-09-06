@@ -64,3 +64,7 @@ text_autoclip_method = C._TEXT_AUTOCLIP_BY_LINE
 text_autoclip_maxline = 2
 # enabled if text_autoclip_method is _TEXT_AUTOCLIP_BY_LENGTH
 # text_autoclip_maxlength = 80
+
+# >> dict
+# print dict with ordered keys
+dict_ordered_key_enable = True

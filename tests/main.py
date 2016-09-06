@@ -146,6 +146,21 @@ class TestAutoClip(unittest.TestCase):
         self.assertEqual(ans, res)
 
 
+class TestDict(unittest.TestCase):
+
+    def setUp(self):
+        pass
+
+    def test_ordered_keys(self):
+        rel_path = 'data/dict/foo.txt'
+        data_path = os.path.join(CUR_SCRIPT_PATH, rel_path)
+        with codecs.open(data_path, encoding='utf8') as fp:
+            ans = fp.read()
+
+        res = df.test_dict_ordered_keys(False)
+
+        self.assertEqual(ans, res)
+
 
 if __name__ == '__main__':
     unittest.main()
