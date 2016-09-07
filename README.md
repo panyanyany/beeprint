@@ -4,8 +4,9 @@ make your debug printing more friendly
 
 Features
 ===
-- print dict elegantly
-- auto wrap text, including English and Chinese
+- dict: print elegantly with ordered keys
+- text: auto break into lines, auto clip long text
+- multi language: supports English, Chinese
 - outstanding mark to class and instance
 - compatible with py2 py3
 
@@ -24,46 +25,46 @@ Import beeprint as pp
 from beeprint.printer import beeprint as pp
 ```
 
-Short List
----
-
+Print dict
+----
+**pprint:**
 ```
-In [2]: alist = [1, 2, 3, 4, 5, 6]
-
-In [3]: pp(alist)
-[1, 2, 3, 4, 5, 6]
+{'entities': {'hashtags': [],
+              'urls': [{'display_url': 'tumblr.com/xnr37hf0yz',
+                        'expanded_url': 'http://tumblr.com/xnr37hf0yz',
+                        'indices': [107, 126],
+                        'url': 'http://t.co/cCIWIwg'}],
+              'user_mentions': []}}
 ```
 
-Complicated List
----
+**beeprint:**
 ```
-In [4]: clist = [1, [2], {'key': 'val'}]
-
-In [5]: pp(clist)
-[
-  1,
-  [2],
-  {
-    'key': 'val',
+{
+  'entities': {
+    'hashtags': [],
+    'urls': [
+      {
+        'display_url': 'tumblr.com/xnr37hf0yz',
+        'expanded_url': 'http://tumblr.com/xnr37hf0yz',
+        'indices': [107, 126],
+        'url': 'http://t.co/cCIWIwg',
+      },
+    ],
+    'user_mentions': [],
   },
-]
+}
 ```
 
-Class Instance
----
+Print class
+----
+**pprint:**
 ```
-In [6]: class NormalClassNewStyle(object): 
-   ...:         def mth():pass
-   ...:         static_props = 1
-   ...:         lists = []
-   ...:         dicts = {}
-   ...:         tupl = (1,2)
-   ...:     
+<class 'definition.NormalClassNewStyle'>
+```
 
-In [7]: obj = NormalClassNewStyle()
-
-In [8]: pp(obj)
-instance(NormalClassNewStyle):
+**beeprint:**
+```
+class(NormalClassNewStyle):
   dicts: {
   },
   lists: [],
@@ -71,99 +72,47 @@ instance(NormalClassNewStyle):
   tupl: (1, 2)
 ```
 
-Long Text
----
+Print instance
+----
+**pprint:**
 ```
-In [27]: long_text_en = "The separation of the sky and the earth took eighteen thousand years-the yang which was light and pure rose to become the sky, and the yin which was heavy and murky（朦胧的） sank to form the earth. Between them was Pangu, who went through nine changes every day, his wisdom greater than that of the sky and his ability greater than that of the earth. Every day the sky rose ten feet higher, the earth became ten feet thicker, and Pangu grew ten feet taller."
-
-In [28]: pp(long_text_en)
-'The separation of the sky and the earth took eighteen thousand years-the yang which was light and pure rose to
- become the sky, and the yin which was heavy and murky（朦胧的） sank to form the earth. Between them was Pangu,
- who went through nine changes every day, his wisdom greater than that of the sky and his ability greater than that
- of the earth. Every day the sky rose ten feet higher, the earth became ten feet thicker, and Pangu grew ten feet
- taller.'
-
-In [30]: long_text_cn = "据民间神话传说古时盘古生在黑暗团中，他不能忍受黑暗，用神斧劈向四方，逐渐使天空高远，大地辽阔。他为不使天地会重新合并，继续施展法术。每当盘古的身体长高一尺，天空就随之增高一尺，经过1.8万多年的努力，盘古变成 一位顶天立地的巨人，而天空也升得高不可及，大地也变得厚实无比。盘古生前完成开天辟地的伟大业绩，死后永远留给后人无穷 无尽的宝藏，成为中华民族崇拜的英雄。""
-
-In [31]: pp(long_text_cn)
-'据民间神话传说古时盘古生在黑暗团中，他不能忍受黑暗，用神斧劈向四方，逐渐使天空高远，大地辽阔。他为不使天地会重新合
- 并，继续施展法术。每当盘古的身体长高一尺，天空就随之增高一尺，经过1.8万多年的努力，盘古变成一位顶天立地的巨人，而
- 天空也升得高不可及，大地也变得厚实无比。盘古生前完成开天辟地的伟大业绩，死后永远留给后人无穷无尽的宝藏，成为中华民
- 族崇拜的英雄。'
+<definition.NormalClassNewStyle object at 0x7f338e5a9dd0>
 ```
 
-Long Text in Dict
----
+**beeprint:**
 ```
-In [33]: d = {'en': long_text_en, 'cn': long_text_cn}
-
-In [34]: pp(d)
-{
-  'en': 'The separation of the sky and the earth took eighteen thousand years-the yang which was light and pure
-         rose to become the sky, and the yin which was heavy and murky（朦胧的） sank to form the earth. Between
-         them was Pangu, who went through nine changes every day, his wisdom greater than that of the sky and his
-         ability greater than that of the earth. Every day the sky rose ten feet higher, the earth became ten feet
-         thicker, and Pangu grew ten feet taller.',
-  'cn': '据民间神话传说古时盘古生在黑暗团中，他不能忍受黑暗，用神斧劈向四方，逐渐使天空高远，大地辽阔。他为不使天地
-         会重新合并，继续施展法术。每当盘古的身体长高一尺，天空就随之增高一尺，经过1.8万多年的努力，盘古变成一位顶
-         天立地的巨人，而天空也升得高不可及，大地也变得厚实无比。盘古生前完成开天辟地的伟大业绩，死后永远留给后人无
-         穷无尽的宝藏，成为中华民族崇拜的英雄。',
-}
+instance(NormalClassNewStyle):
+  dicts: {
+  },
+  lists: [],
+  say_hi: 'hello world',
+  static_props: 1,
+  tupl: (1, 2)
 ```
 
-Complicated data
----
+Print long text
+----
+**pprint:**
+```
+[['\nThe sky and the earth were at first one blurred entity like an egg. Pangu was born into it.\n \n\tThe separation of the sky and the earth took eighteen thousand years-the yang which was light and pure rose to become the sky, \tand the yin which was heavy and murky\xef\xbc\x88\xe6\x9c\xa6\xe8\x83\xa7\xe7\x9a\x84\xef\xbc\x89 sank to form the earth. Between them was Pangu, who went through nine \tchanges every day, his wisdom greater than that of the sky and his ability greater than that of the earth. Every day the sky rose ten feet higher, the earth became ten feet thicker, and Pangu grew ten feet taller.\n \nAnother eighteen thousand years passed, and there was an extremely high sky, an extremely thick earth, and an extremely tall Pangu. After Pangu died, his head turned into the Five Sacred Mountains (Mount Tai, Mount Heng, Mount Hua, Mount Heng, Mount Song), his eyes turned into the moon and the sun, his blood changed into water in river and sea, his hair into grass.\n \nIn all, the universe and Pangu combine in one.\n',
+  '\n\xe6\x8d\xae\xe6\xb0\x91\xe9\x97\xb4\xe7\xa5\x9e\xe8\xaf\x9d\xe4\xbc\xa0\xe8\xaf\xb4\xe5\x8f\xa4\xe6\x97\xb6\xe7\x9b\x98\xe5\x8f\xa4\xe7\x94\x9f\xe5\x9c\xa8\xe9\xbb\x91\xe6\x9a\x97\xe5\x9b\xa2\xe4\xb8\xad\xef\xbc\x8c\xe4\xbb\x96\xe4\xb8\x8d\xe8\x83\xbd\xe5\xbf\x8d\xe5\x8f\x97\xe9\xbb\x91\xe6\x9a\x97\xef\xbc\x8c\xe7\x94\xa8\xe7\xa5\x9e\xe6\x96\xa7\xe5\x8a\x88\xe5\x90\x91\xe5\x9b\x9b\xe6\x96\xb9\xef\xbc\x8c\xe9\x80\x90\xe6\xb8\x90\xe4\xbd\xbf\xe5\xa4\xa9\xe7\xa9\xba\xe9\xab\x98\xe8\xbf\x9c\xef\xbc\x8c\xe5\xa4\xa7\xe5\x9c\xb0\xe8\xbe\xbd\xe9\x98\x94\xe3\x80\x82\n\t\xe4\xbb\x96\xe4\xb8\xba\xe4\xb8\x8d\xe4\xbd\xbf\xe5\xa4\xa9\xe5\x9c\xb0\xe4\xbc\x9a\xe9\x87\x8d\xe6\x96\xb0\xe5\x90\x88\xe5\xb9\xb6\xef\xbc\x8c\xe7\xbb\xa7\xe7\xbb\xad\xe6\x96\xbd\xe5\xb1\x95\xe6\xb3\x95\xe6\x9c\xaf\xe3\x80\x82\xe6\xaf\x8f\xe5\xbd\x93\xe7\x9b\x98\xe5\x8f\xa4\xe7\x9a\x84\xe8\xba\xab\xe4\xbd\x93\xe9\x95\xbf\xe9\xab\x98\xe4\xb8\x80\xe5\xb0\xba\xef\xbc\x8c\xe5\xa4\xa9\xe7\xa9\xba\xe5\xb0\xb1\xe9\x9a\x8f\xe4\xb9\x8b\xe5\xa2\x9e\xe9\xab\x98\xe4\xb8\x80\xe5\xb0\xba\xef\xbc\x8c\n\t\xe7\xbb\x8f\xe8\xbf\x871.8\xe4\xb8\x87\xe5\xa4\x9a\xe5\xb9\xb4\xe7\x9a\x84\xe5\x8a\xaa\xe5\x8a\x9b\xef\xbc\x8c\xe7\x9b\x98\xe5\x8f\xa4\xe5\x8f\x98\xe6\x88\x90\xe4\xb8\x80\xe4\xbd\x8d\xe9\xa1\xb6\xe5\xa4\xa9\xe7\xab\x8b\xe5\x9c\xb0\xe7\x9a\x84\xe5\xb7\xa8\xe4\xba\xba\xef\xbc\x8c\xe8\x80\x8c\xe5\xa4\xa9\xe7\xa9\xba\xe4\xb9\x9f\xe5\x8d\x87\xe5\xbe\x97\xe9\xab\x98\xe4\xb8\x8d\xe5\x8f\xaf\xe5\x8f\x8a\xef\xbc\x8c\xe5\xa4\xa7\xe5\x9c\xb0\xe4\xb9\x9f\xe5\x8f\x98\xe5\xbe\x97\xe5\x8e\x9a\xe5\xae\x9e\xe6\x97\xa0\xe6\xaf\x94\xe3\x80\x82\xe7\x9b\x98\xe5\x8f\xa4\xe7\x94\x9f\xe5\x89\x8d\xe5\xae\x8c\xe6\x88\x90\xe5\xbc\x80\xe5\xa4\xa9\xe8\xbe\x9f\xe5\x9c\xb0\xe7\x9a\x84\xe4\xbc\x9f\xe5\xa4\xa7\xe4\xb8\x9a\xe7\xbb\xa9\xef\xbc\x8c\xe6\xad\xbb\xe5\x90\x8e\xe6\xb0\xb8\xe8\xbf\x9c\xe7\x95\x99\xe7\xbb\x99\xe5\x90\x8e\xe4\xba\xba\xe6\x97\xa0\xe7\xa9\xb7\xe6\x97\xa0\xe5\xb0\xbd\xe7\x9a\x84\xe5\xae\x9d\xe8\x97\x8f\xef\xbc\x8c\xe6\x88\x90\xe4\xb8\xba\xe4\xb8\xad\xe5\x8d\x8e\xe6\xb0\x91\xe6\x97\x8f\xe5\xb4\x87\xe6\x8b\x9c\xe7\x9a\x84\xe8\x8b\xb1\xe9\x9b\x84\xe3\x80\x82\n']]
+```
+
+**beeprint:**
 ```
 [
-  1,
-  1.1,
-  'literal',
-  'unicode',
-  'literal中文',
-  'unicode中文',
-  [1, 2, 3, 4, 5, 6],
   [
-    1,
-    [2],
-    {
-      'key': 'val',
-    },
+    '\nThe sky and the earth were at first one blurred entity like an egg. Pangu
+     was born into it.\n \n\tThe separation of the sky and the earth took
+     ...(12 hidden lines)',
+    '\n据民间神话传说古时盘古生在黑暗团中，他不能忍受黑暗，用神斧劈向四方，逐渐
+     使天空高远，大地辽阔。\n\t他为不使天地会重新合并，继续施展法术。每当盘古的
+     ...(3 hidden lines)',
   ],
-  (1, 2),
-  function(EmptyFunc),
-  class(EmptyClassOldStyle),
-  class(EmptyClassNewStyle),
-  class(NormalClassOldStyle):
-    static_props: 1
-  class(NormalClassNewStyle):
-    dicts: {
-    },
-    lists: [],
-    static_props: 1,
-    tupl: (1, 2)
-  instance(NormalClassOldStyle):
-    static_props: 1
-  instance(NormalClassNewStyle):
-    dicts: {
-    },
-    lists: [],
-    static_props: 1,
-    tupl: (1, 2)
-  method(mth),
-  method(mth),
-  {
-    'key': []
-  },
-  {
-    'key': instance(NormalClassNewStyle):
-      dicts: {
-      },
-      lists: [],
-      static_props: 1,
-      tupl: (1, 2)
-  },
 ]
 ```
+
+
 
 Installation
 ===
