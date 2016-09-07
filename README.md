@@ -19,6 +19,10 @@ Contents
 Examples
 ===
 
+A Real World Example
+---
+![A Real World Example](./docs/images/a_real_world_example.png)
+
 Import beeprint as pp
 ---
 ```
