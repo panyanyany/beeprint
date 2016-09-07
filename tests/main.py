@@ -107,6 +107,25 @@ class TestSimpleTypes(unittest.TestCase):
         
         self.assertEqual(res, ans)
 
+    def test_out_of_range_in_dict(self):
+        S.max_depth = 1
+
+        ans = ""
+        rel_path = 'data/out_of_range_in_dict.txt'
+        data_path = os.path.join(CUR_SCRIPT_PATH, rel_path)
+        with codecs.open(data_path, encoding='utf8') as fp:
+            ans = fp.read()
+        # delete object id, such as
+        # <definition.NormalClassOldStyle object at 0x7f2d9a61bac8>
+        ans, _ = re.subn("at 0x[\d\w]+", "", ans)
+
+        res = beeprint(df.out_of_range_in_dict, output=False)
+        # delete object id, such as
+        # <definition.NormalClassOldStyle object at 0x7f2d9a61bac8>
+        res, _ = re.subn("at 0x[\d\w]+", "", res)
+        
+        self.assertEqual(res, ans)
+
 
     def test_long_text(self):
         pass

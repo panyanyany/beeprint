@@ -66,7 +66,12 @@ class Block(object):
                 if elements.index(self.subject) == len(elements)-1:
                     tail = u''
             elif is_class_instance(value) or utils.is_class(value):
-                tail = u''
+                if self.indent_cnt >= S.max_depth:
+                    # if reach max depth, the value would be repr as one-line string
+                    # so comma is need
+                    pass
+                else:
+                    tail = u''
             # print('%s or %s: %s' % (is_class_instance(value), utils.is_class(value), value))
 
         return tail
@@ -100,11 +105,9 @@ class Block(object):
                               element_tail=tail)
             imsg = st_handler.inline_msg(obj, context)
             if S.newline or position & C._AS_ELEMENT_:
-                ret = ustr(leadCnt * S.leading) + imsg + ustr("\n")
+                ret = ustr(leadCnt * S.leading) + imsg + tail + ustr("\n")
             else:
-                ret = ustr(" ") + imsg + ustr("\n")
-            if position & C._AS_LIST_ELEMENT_:
-                ret = ret[:-1] + ustr(tail + "\n")
+                ret = ustr(" ") + imsg + tail + ustr("\n")
             return _b(ret)
 
         if isinstance(obj, dict):

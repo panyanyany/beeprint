@@ -31,6 +31,7 @@ from beeprint import beeprint as pp, pyv
 from beeprint import settings as S 
 from beeprint import constants as C 
 from pprint import pprint
+from pprintpp import pprint as ppp
 
 try:
     from . import definition as df
@@ -41,11 +42,14 @@ except:
 def pair_print(title, v):
     print(title)
     print("----")
-    print("**pprint:**\n```")
+    print("**pprint:**\n```python")
     pprint(v)
     print("```\n")
-    print("**beeprint:**\n```")
+    print("**beeprint:**\n```python")
     pp(v)
+    print("```\n")
+    print("**pprintpp:**\n```python")
+    ppp(v)
     print("```\n")
 
 

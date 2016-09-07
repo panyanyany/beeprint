@@ -112,6 +112,19 @@ out_of_range = [
     inst_of_normal_class_new_style,
 ]
 
+def test_out_of_range(output=True):
+    S.max_depth = 1
+    return pp(out_of_range, output)
+
+out_of_range_in_dict = {
+    'one': inst_of_normal_class_new_style,
+    'two': inst_of_normal_class_new_style,
+}
+
+def test_out_of_range_in_dict(output=True):
+    S.max_depth = 1
+    return pp(out_of_range_in_dict, output)
+
 clip_by_3_lines = [
     'a'*(77*2 - 2),
     'a'*77*2,
@@ -146,3 +159,4 @@ dict_multi_keys = {
 def test_dict_ordered_keys(output=True):
     S.dict_ordered_key_enable = True
     return pp(dict_multi_keys, output)
+
