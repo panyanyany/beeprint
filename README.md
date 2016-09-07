@@ -4,9 +4,9 @@ make your debug printing more friendly
 
 Features
 ===
-- dict: print elegantly with ordered keys
-- text: auto break into lines, auto clip long text
-- multi language: supports English, Chinese
+- **dict:** print elegantly with ordered keys
+- **text:** auto break into lines, auto clip long text
+- **multi language:** supports English, Chinese
 - outstanding mark to class and instance
 - compatible with py2 py3
 
@@ -22,7 +22,7 @@ Examples
 Import beeprint as pp
 ---
 ```
-from beeprint.printer import beeprint as pp
+from beeprint import beeprint as pp
 ```
 
 Print dict
