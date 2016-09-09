@@ -97,7 +97,7 @@ v_line_break_boundary = [
     "boundary testing string: 82col,new line part filled with x ............... xx",
 ]
 
-def f_line_break_boundary(output=True):
+def test_boundary_break(output=True):
     S.text_wrap_method = C._TEXT_WRAP_BY_WIDTH
     return pp(v_line_break_boundary, output)
 
@@ -160,3 +160,11 @@ def test_dict_ordered_keys(output=True):
     S.dict_ordered_key_enable = True
     return pp(dict_multi_keys, output)
 
+
+def test_complicate_data(output=True):
+    S.text_wrap_method = C._TEXT_WRAP_BY_WIDTH
+    S.text_autoclip_enable = False
+    res = pp(values, output)
+    res += pp(long_text_in_dict, output)
+    res += pp(long_text_in_list, output)
+    return res

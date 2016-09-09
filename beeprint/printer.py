@@ -21,7 +21,7 @@ if pyv == 2:
 from . import settings as S
 from . import constants as C
 from .utils import print_exc_plus
-from .models.block import Block
+from .models.block import Block, Context
 
 
 def beeprint(o, output=True):
@@ -57,10 +57,11 @@ def beeprint(o, output=True):
     >>> beeprint(u'\\\\'.encode("utf8"))
     '\\'
     """
-    res = str(Block(o))
+    res = str(Block(Context(obj=o)))
     if output and not S.write_to_buffer_when_execute:
         try:
             print(res, end='')
+            return res
         except Exception as e:
             print_exc_plus()
             if type(e) is UnicodeEncodeError:

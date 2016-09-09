@@ -15,7 +15,7 @@ encoding = 'utf-8'
 
 # >> representation
 max_depth = 5
-leading = u'  '
+indent_char = u'  '
 newline = False
 tuple_in_line = True
 list_in_line = True

@@ -144,7 +144,7 @@ class TestLineBreak(unittest.TestCase):
         with codecs.open(data_path, encoding='utf8') as fp:
             ans = fp.read()
 
-        res = df.f_line_break_boundary(False)
+        res = df.test_boundary_break(False)
 
         self.assertEqual(ans, res)
 
