@@ -191,8 +191,6 @@ class ClassBlock(Block):
         _leading = ustr('')
         if position & C._AS_ELEMENT_:
             _leading += S.indent_char * indent_cnt
-        # elif position & C._AS_DICT_ELEMENT_:
-        #     _leading += ustr(' ')
         elif position & C._AS_VALUE_:
             _leading += ustr('')
 
@@ -282,7 +280,6 @@ class DictBlock(Block):
 
         # body
         for k, v in self.get_elements():
-            # v = o[k]
             if dict_key_filter(o, k, v):
                 continue
             ctx = self.ctx.clone()
@@ -537,15 +534,6 @@ class Context(object):
     def val_expr(self):
         raise Exception("not yet implement")
 
-    def calc_wrapped_line_indent(self):
-        indent_char = u''.join([
-            self.indent_char,
-            self.key_expr,
-            self.sep_expr,
-        ])
-        indent = urwid.str_util.calc_width(indent_char, 0, len(indent_char))
-        return indent
-
 
 def repr_block(obj):
     return str(ReprBlock(Context(obj=obj)))
@@ -642,11 +630,11 @@ class ReprStringHandler(ReprBlock.Handler):
         if typ.is_all(typ._BYTES_):
             obj = obj.decode(S.encoding)
 
-        obj = self.escape(ustr(obj))
-        wrapper = StringWrapper(obj, typ)
+        ctx.obj = obj = self.escape(ustr(obj))
+        wrapper = StringWrapper(typ)
         self.rearrenge(ctx, typ, wrapper)
 
-        return str(wrapper)
+        return wrapper.wrap(ctx.obj)
 
     def rearrenge(self, ctx, typ, wrapper):
         pass
@@ -662,7 +650,7 @@ class ReprStringHandlerMultiLiner(ReprStringHandler):
 
         if a_width > 0:
             seg_list = break_string(
-                wrapper.obj + 
+                ctx.obj + 
                 wrapper.rqm + 
                 ctx.element_ending, 
                 a_width)
@@ -688,9 +676,7 @@ class ReprStringHandlerMultiLiner(ReprStringHandler):
                     hidden_lines = lines_cnt - S.text_autoclip_maxline
                     plural_sign = '' if hidden_lines == 1 else 's'
                     seg_list.append("%s...(%d hidden line%s)" % (left_margin_chars, hidden_lines, plural_sign))
-            s = "\n".join(seg_list)
-        
-        wrapper.obj = s
+            ctx.obj = "\n".join(seg_list)
 
 
 class ReprOthersHandler(ReprBlock.Handler):
@@ -714,14 +700,13 @@ class ReprHandlerInlineRepr(ReprBlock.Handler):
             'base types'
             wrapper = None
             if typ.is_string():
-                wrapper = StringWrapper(o, typ)
+                wrapper = StringWrapper(typ)
             else:
                 o = ustr(o)
             o = shrink_inner_string(o, ctx, wrapper)
 
             if wrapper:
-                wrapper.obj = o
-                o = str(wrapper)
+                o = wrapper.wrap(o)
         else:
             'class definitions or class instances'
             o = repr(o)

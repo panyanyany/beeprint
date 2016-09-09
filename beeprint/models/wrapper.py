@@ -10,24 +10,20 @@ from beeprint import settings as S
 
 class Wrapper(object):
 
-    def __init__(self, obj, **kwargs):
-        self.obj = obj
-
     def get_prefix(self):
         pass
 
     def get_suffix(self):
         pass
 
-    def __str__(self):
+    def wrap(self, obj):
         pass
 
 
 class StringWrapper(Wrapper):
 
-    def __init__(self, obj, typ, lqm=None, rqm=None, etm=None):
+    def __init__(self, typ, lqm=None, rqm=None, etm=None):
 
-        self.obj = obj
         # ReprType
         self.typ = typ
         # left_quotation_mark
@@ -52,11 +48,11 @@ class StringWrapper(Wrapper):
                 else:
                     self.etm = u'b'
 
-    def __str__(self):
+    def wrap(self, obj):
         return ''.join([
             self.etm,
             self.lqm,
-            self.obj,
+            obj,
             self.rqm,
         ])
 
