@@ -11,7 +11,7 @@ BEEPRINT_PATH = os.path.abspath(os.path.join(CUR_SCRIPT_PATH, '..'))
 sys.path.append(BEEPRINT_PATH)
 
 from beeprint import pyv
-from beeprint import beeprint
+from beeprint import beeprint as pp
 from beeprint import settings as S
 from beeprint import constants as C
 
@@ -23,18 +23,21 @@ except:
     import definition as df
 
 
-class TestSimpleTypes(unittest.TestCase):
+class TestBase(unittest.TestCase):
 
     def setUp(self):
         pass
 
+
+class TestSimpleTypes(TestBase):
+
     def test_positive(self):
-        self.assertEqual(beeprint(1, output=False), '1\n')
-        self.assertEqual(beeprint(1.1, output=False), '1.1\n')
+        self.assertEqual(pp(1, output=False), '1\n')
+        self.assertEqual(pp(1.1, output=False), '1.1\n')
 
     def test_negative(self):
-        self.assertEqual(beeprint(-1, output=False), '-1\n')
-        self.assertEqual(beeprint(-1.1, output=False), '-1.1\n')
+        self.assertEqual(pp(-1, output=False), '-1\n')
+        self.assertEqual(pp(-1.1, output=False), '-1.1\n')
 
     def test_string(self):
         # string literal
@@ -42,34 +45,34 @@ class TestSimpleTypes(unittest.TestCase):
         S.str_display_not_prefix_u = False
         S.str_display_not_prefix_b = False
         if pyv == 2:
-            self.assertEqual(beeprint("plain string", output=False), "b'plain string'\n")
+            self.assertEqual(pp("plain string", output=False), "b'plain string'\n")
         elif pyv == 3:
-            self.assertEqual(beeprint("plain string", output=False), "u'plain string'\n")
+            self.assertEqual(pp("plain string", output=False), "u'plain string'\n")
 
         # unicode string
         s = u'unicode string'
-        self.assertEqual(beeprint(s, output=False), u"u'unicode string'\n")
+        self.assertEqual(pp(s, output=False), u"u'unicode string'\n")
 
         # utf8 string
         s = u'utf8 string'.encode('utf-8')
-        self.assertEqual(beeprint(s, output=False), u"b'utf8 string'\n")
+        self.assertEqual(pp(s, output=False), u"b'utf8 string'\n")
 
         # gb2312 string
         s = u'gb2312 string'.encode('gb2312')
-        self.assertEqual(beeprint(s, output=False), u"b'gb2312 string'\n")
+        self.assertEqual(pp(s, output=False), u"b'gb2312 string'\n")
 
         # unicode special characters string
         s = u'\\'
-        self.assertEqual(beeprint(s, output=False), u"u'\\'\n")
+        self.assertEqual(pp(s, output=False), u"u'\\'\n")
 
         # utf8 special characters string
         s = u'\\'.encode("utf8")
-        self.assertEqual(beeprint(s, output=False), u"b'\\'\n")
+        self.assertEqual(pp(s, output=False), u"b'\\'\n")
 
     def test_complicate_data(self):
         # S.str_display_not_prefix_u = False
         # S.str_display_not_prefix_b = False
-        S.text_wrap_method = C._TEXT_WRAP_BY_WIDTH
+        S.string_break_method = C._STRING_BREAK_BY_WIDTH
         S.text_autoclip_enable = False
 
         ans = u""
@@ -78,9 +81,9 @@ class TestSimpleTypes(unittest.TestCase):
         with codecs.open(data_path, encoding="utf8") as fp:
             ans = fp.read()
 
-        res = beeprint(values, output=False)
-        res += beeprint(df.long_text_in_dict, output=False)
-        res += beeprint(df.long_text_in_list, output=False)
+        res = pp(values, output=False)
+        res += pp(df.long_text_in_dict, output=False)
+        res += pp(df.long_text_in_list, output=False)
         self.assertEqual(res, ans)
         # self.assertEqual(res, ans)
 
@@ -100,7 +103,7 @@ class TestSimpleTypes(unittest.TestCase):
         # <definition.NormalClassOldStyle object at 0x7f2d9a61bac8>
         ans, _ = re.subn("at 0x[\d\w]+", "", ans)
 
-        res = beeprint(df.out_of_range, output=False)
+        res = pp(df.out_of_range, output=False)
         # delete object id, such as
         # <definition.NormalClassOldStyle object at 0x7f2d9a61bac8>
         res, _ = re.subn("at 0x[\d\w]+", "", res)
@@ -119,7 +122,7 @@ class TestSimpleTypes(unittest.TestCase):
         # <definition.NormalClassOldStyle object at 0x7f2d9a61bac8>
         ans, _ = re.subn("at 0x[\d\w]+", "", ans)
 
-        res = beeprint(df.out_of_range_in_dict, output=False)
+        res = pp(df.out_of_range_in_dict, output=False)
         # delete object id, such as
         # <definition.NormalClassOldStyle object at 0x7f2d9a61bac8>
         res, _ = re.subn("at 0x[\d\w]+", "", res)
@@ -129,17 +132,14 @@ class TestSimpleTypes(unittest.TestCase):
 
     def test_long_text(self):
         pass
-        # res = beeprint(long_text_en, output=False)
+        # res = pp(long_text_en, output=False)
         # self.assertEqual(res, ans)
 
 
-class TestLineBreak(unittest.TestCase):
+class TestLineBreak(TestBase):
     
-    def setUp(self):
-        pass
-
     def test_boundary_break(self):
-        rel_path = 'data/line_break/boundary_break.txt'
+        rel_path = 'data/string_break/boundary_break.txt'
         data_path = os.path.join(CUR_SCRIPT_PATH, rel_path)
         with codecs.open(data_path, encoding='utf8') as fp:
             ans = fp.read()
@@ -149,10 +149,7 @@ class TestLineBreak(unittest.TestCase):
         self.assertEqual(ans, res)
 
 
-class TestAutoClip(unittest.TestCase):
-
-    def setUp(self):
-        pass
+class TestAutoClip(TestBase):
 
     def test_3lines_clip(self):
         rel_path = 'data/auto_clip/by_lines.txt'
@@ -165,10 +162,7 @@ class TestAutoClip(unittest.TestCase):
         self.assertEqual(ans, res)
 
 
-class TestDict(unittest.TestCase):
-
-    def setUp(self):
-        pass
+class TestDict(TestBase):
 
     def test_ordered_keys(self):
         rel_path = 'data/dict/foo.txt'
@@ -180,6 +174,20 @@ class TestDict(unittest.TestCase):
 
         self.assertEqual(ans, res)
 
+
+class TestInlineRepr(TestBase):
+
+    def test_inline_repr_out_of_range(self):
+        rel_path = 'data/inline_repr/out_of_range.txt'
+        data_path = os.path.join(CUR_SCRIPT_PATH, rel_path)
+        with codecs.open(data_path, encoding='utf8') as fp:
+            ans = fp.read()
+
+        res = df.test_inline_repr_out_of_range(False)
+        S.string_break_width = 80
+        S.max_depth = 5
+
+        self.assertEqual(ans, res)
 
 if __name__ == '__main__':
     unittest.main()

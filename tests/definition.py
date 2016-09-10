@@ -98,12 +98,12 @@ v_line_break_boundary = [
 ]
 
 def test_boundary_break(output=True):
-    S.text_wrap_method = C._TEXT_WRAP_BY_WIDTH
+    S.string_break_method = C._STRING_BREAK_BY_WIDTH
     return pp(v_line_break_boundary, output)
 
 
 out_of_range = [
-    'nomarl',
+    'nomarl\t\n1',
     complicated_list,
     EmptyFunc,
     EmptyClassOldStyle,
@@ -135,8 +135,8 @@ clip_by_3_lines = [
 def test_3lines_clip(output=True):
     S.text_autoclip_enable = True
     S.text_autoclip_method = C._TEXT_AUTOCLIP_BY_LINE
-    S.text_wrap_enable = True
-    S.text_wrap_method = C._TEXT_WRAP_BY_WIDTH
+    S.string_break_enable = True
+    S.string_break_method = C._STRING_BREAK_BY_WIDTH
     return pp(clip_by_3_lines, output)
 
 
@@ -162,9 +162,21 @@ def test_dict_ordered_keys(output=True):
 
 
 def test_complicate_data(output=True):
-    S.text_wrap_method = C._TEXT_WRAP_BY_WIDTH
+    S.string_break_method = C._STRING_BREAK_BY_WIDTH
     S.text_autoclip_enable = False
     res = pp(values, output)
     res += pp(long_text_in_dict, output)
     res += pp(long_text_in_list, output)
     return res
+
+inline_repr = [
+    "this string fits 80 col line ..... ..... ..... ..... ..... ..... ..... ....",
+    inst_of_normal_class_new_style,
+    inst_of_normal_class_new_style.mth,
+]
+
+def test_inline_repr_out_of_range(output=True):
+    S.max_depth = 1
+    S.string_break_method = C._STRING_BREAK_BY_WIDTH
+    S.string_break_width = 40
+    return pp(inline_repr, output)

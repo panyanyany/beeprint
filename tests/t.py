@@ -109,9 +109,7 @@ def main():
         # pp(tweet)
         # df.test_boundary_break()
         # df.test_complicate_data()
-        S.text_wrap_method = C._TEXT_WRAP_BY_WIDTH
-        S.text_autoclip_enable = False
-        pp(df.long_text_in_dict)
+        df.test_inline_repr_out_of_range()
 
         return
 

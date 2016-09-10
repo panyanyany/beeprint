@@ -52,15 +52,15 @@ str_display_escape_special_char = True
 element_display_last_with_comma = True
 
 # >> long string control
-text_wrap_enable = True
-text_wrap_method = C._TEXT_WRAP_BY_TERMINAL
-text_wrap_width = 80
+string_break_enable = True
+string_break_method = C._STRING_BREAK_BY_TERMINAL
+string_break_width = 80
 
 # >> auto clip text
 text_autoclip_enable = True
 text_autoclip_method = C._TEXT_AUTOCLIP_BY_LINE
 # enabled if text_autoclip_method is _TEXT_AUTOCLIP_BY_LINE
-# and text_wrap_enable is True
+# and string_break_enable is True
 text_autoclip_maxline = 2
 # enabled if text_autoclip_method is _TEXT_AUTOCLIP_BY_LENGTH
 # text_autoclip_maxlength = 80

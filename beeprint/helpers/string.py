@@ -44,14 +44,12 @@ def too_long(leadCnt, position, inst_of_repr_block):
 
 
 def calc_left_margin(ctx, wrapper=None):
-    left_margin = 0
-    if ctx:
-        left_filling = u''.join([
-            ctx.indent,
-            ctx.key_expr,
-            ctx.sep_expr,
-        ])
-        left_margin = calc_width(left_filling)
+    left_filling = u''.join([
+        ctx.indent,
+        ctx.key_expr,
+        ctx.sep_expr,
+    ])
+    left_margin = calc_width(left_filling)
 
     if wrapper is not None:
         left_margin += calc_width(wrapper.get_prefix())
@@ -71,10 +69,10 @@ def calc_right_margin(ctx, wrapper=None):
 
 def get_line_width():
     width = 0
-    if S.text_wrap_method == C._TEXT_WRAP_BY_TERMINAL:
+    if S.string_break_method == C._STRING_BREAK_BY_TERMINAL:
         width = get_terminal_size()[0]
-    elif S.text_wrap_method == C._TEXT_WRAP_BY_WIDTH:
-        width = S.text_wrap_width
+    elif S.string_break_method == C._STRING_BREAK_BY_WIDTH:
+        width = S.string_break_width
 
     return width
 
@@ -93,7 +91,8 @@ def shrink_string(s, width):
     return s
 
 
-def shrink_inner_string(s, ctx, wrapper=None):
+def shrink_inner_string(ctx, wrapper=None):
+    s = ctx.obj
     left_margin = calc_left_margin(ctx, wrapper)
     right_margin = calc_right_margin(ctx, wrapper)
 
@@ -105,6 +104,8 @@ def shrink_inner_string(s, ctx, wrapper=None):
         info = u'...(len=%d)' % (s_width)
         s = cut_string(s, a_width - calc_width(info))
         s += info
+
+    ctx.obj = s
     return s
 
 

@@ -102,7 +102,8 @@ class Block(object):
             else:
                 ret = ustr(" ")
 
-            rb = ReprBlock(self.ctx, handlers=[ReprHandlerInlineRepr()])
+            rb = ReprBlock(self.ctx, handlers=[ReprStringHandlerInlineRepr(),
+                                               ReprOthersHandlerInlineRepr()])
             ret += str(rb) + tail + '\n'
             return _b(ret)
 
@@ -464,7 +465,8 @@ class PairBlock(Block):
             ctx = self.ctx.clone()
             ctx.obj = val
             if S.max_depth <= indent_cnt:
-                rb = ReprBlock(ctx, handlers=[ReprHandlerInlineRepr()])
+                rb = ReprBlock(ctx, handlers=[ReprStringHandlerInlineRepr(),
+                                              ReprOthersHandlerInlineRepr()])
                 ret += _b(ustr(" " + str(rb) + tail + block_ending))
             else:
                 rb = ReprBlock(ctx, handlers=[ReprStringHandlerMultiLiner(), 
@@ -632,12 +634,11 @@ class ReprStringHandler(ReprBlock.Handler):
 
         ctx.obj = obj = self.escape(ustr(obj))
         wrapper = StringWrapper(typ)
-        self.rearrenge(ctx, typ, wrapper)
 
-        return wrapper.wrap(ctx.obj)
+        return self.rearrenge(ctx, typ, wrapper)
 
     def rearrenge(self, ctx, typ, wrapper):
-        pass
+        return wrapper.wrap(ctx.obj)
 
 class ReprStringHandlerMultiLiner(ReprStringHandler):
 
@@ -678,6 +679,8 @@ class ReprStringHandlerMultiLiner(ReprStringHandler):
                     seg_list.append("%s...(%d hidden line%s)" % (left_margin_chars, hidden_lines, plural_sign))
             ctx.obj = "\n".join(seg_list)
 
+        return wrapper.wrap(ctx.obj)
+
 
 class ReprOthersHandler(ReprBlock.Handler):
 
@@ -688,27 +691,19 @@ class ReprOthersHandler(ReprBlock.Handler):
         return ustr(repr(ctx.obj))
 
 
-class ReprHandlerInlineRepr(ReprBlock.Handler):
-    """repr any object in one line"""
+class ReprStringHandlerInlineRepr(ReprStringHandler):
+    """repr string object in one line"""
 
-    def accept(self, typ):
-        return True
+    def rearrenge(self, ctx, typ, wrapper):
+        shrink_inner_string(ctx, wrapper)
+        return wrapper.wrap(ctx.obj)
+
+
+class ReprOthersHandlerInlineRepr(ReprOthersHandler):
+    """repr non-string object in one line"""
     
     def __call__(self, ctx, typ):
-        o = ctx.obj
-        if isinstance(o, (int, float, tuple, list, dict, bytes, str, _unicode)):
-            'base types'
-            wrapper = None
-            if typ.is_string():
-                wrapper = StringWrapper(typ)
-            else:
-                o = ustr(o)
-            o = shrink_inner_string(o, ctx, wrapper)
+        ctx.obj = ustr(repr(ctx.obj))
+        shrink_inner_string(ctx, None)
 
-            if wrapper:
-                o = wrapper.wrap(o)
-        else:
-            'class definitions or class instances'
-            o = repr(o)
-
-        return o
+        return ctx.obj

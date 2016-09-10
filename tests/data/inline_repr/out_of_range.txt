@@ -1,0 +1,5 @@
+[
+  'this string fits 80 col...(len=75)',
+  <definition.NormalClassNew...(len=57),
+  <bound method...(len=99),
+]
