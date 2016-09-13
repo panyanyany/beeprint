@@ -18,47 +18,22 @@ if pyv == 2:
     reload(sys)
     sys.setdefaultencoding('utf-8')
 
-from . import settings as S
 from . import constants as C
 from .utils import print_exc_plus
 from .models.block import Block, Context
+from .config import Config
 
 
-def beeprint(o, output=True):
+def pp(o, output=True, max_depth=None, config=None):
     """print data beautifully
-
-    >>> beeprint(1)
-    1
-
-    >>> beeprint(1.1)
-    1.1
-
-    >>> beeprint(-1)
-    -1
-
-    >>> beeprint(-1.1)
-    -1.1
-
-    >>> beeprint("plain string")
-    'plain string'
-
-    >>> beeprint(u'unicode string')
-    'unicode string'
-
-    >>> beeprint(u'utf8 string'.encode('utf-8'))
-    'utf8 string'
-
-    >>> beeprint(u'gb2312 string'.encode('gb2312'))
-    'gb2312 string'
-
-    >>> beeprint(u'\\\\')
-    '\\'
-
-    >>> beeprint(u'\\\\'.encode("utf8"))
-    '\\'
     """
-    res = str(Block(Context(obj=o)))
-    if output and not S.write_to_buffer_when_execute:
+
+    config = config or Config()
+    if max_depth:
+        config.max_depth = max_depth
+
+    res = str(Block(config, Context(obj=o)))
+    if output and not config.write_to_buffer_when_execute:
         try:
             print(res, end='')
             return res

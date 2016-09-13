@@ -1,7 +1,7 @@
 # -*- coding:utf-8 -*-
-from beeprint import settings as S 
 from beeprint import constants as C 
-from beeprint import beeprint as pp
+from beeprint import pp
+from beeprint import Config
 
 def EmptyFunc(): pass
 
@@ -98,8 +98,9 @@ v_line_break_boundary = [
 ]
 
 def test_boundary_break(output=True):
-    S.string_break_method = C._STRING_BREAK_BY_WIDTH
-    return pp(v_line_break_boundary, output)
+    config = Config()
+    config.string_break_method = C._STRING_BREAK_BY_WIDTH
+    return pp(v_line_break_boundary, output, config=config)
 
 
 out_of_range = [
@@ -113,8 +114,9 @@ out_of_range = [
 ]
 
 def test_out_of_range(output=True):
-    S.max_depth = 1
-    return pp(out_of_range, output)
+    config = Config()
+    config.max_depth = 1
+    return pp(out_of_range, output, config=config)
 
 out_of_range_in_dict = {
     'one': inst_of_normal_class_new_style,
@@ -122,8 +124,9 @@ out_of_range_in_dict = {
 }
 
 def test_out_of_range_in_dict(output=True):
-    S.max_depth = 1
-    return pp(out_of_range_in_dict, output)
+    config = Config()
+    config.max_depth = 1
+    return pp(out_of_range_in_dict, output, config=config)
 
 clip_by_3_lines = [
     'a'*(77*2 - 2),
@@ -133,11 +136,12 @@ clip_by_3_lines = [
 
 
 def test_3lines_clip(output=True):
-    S.text_autoclip_enable = True
-    S.text_autoclip_method = C._TEXT_AUTOCLIP_BY_LINE
-    S.string_break_enable = True
-    S.string_break_method = C._STRING_BREAK_BY_WIDTH
-    return pp(clip_by_3_lines, output)
+    config = Config()
+    config.text_autoclip_enable = True
+    config.text_autoclip_method = C._TEXT_AUTOCLIP_BY_LINE
+    config.string_break_enable = True
+    config.string_break_method = C._STRING_BREAK_BY_WIDTH
+    return pp(clip_by_3_lines, output, config=config)
 
 
 dict_multi_keys = {
@@ -157,16 +161,18 @@ dict_multi_keys = {
 
 
 def test_dict_ordered_keys(output=True):
-    S.dict_ordered_key_enable = True
-    return pp(dict_multi_keys, output)
+    config = Config()
+    config.dict_ordered_key_enable = True
+    return pp(dict_multi_keys, output, config=config)
 
 
 def test_complicate_data(output=True):
-    S.string_break_method = C._STRING_BREAK_BY_WIDTH
-    S.text_autoclip_enable = False
-    res = pp(values, output)
-    res += pp(long_text_in_dict, output)
-    res += pp(long_text_in_list, output)
+    config = Config()
+    config.string_break_method = C._STRING_BREAK_BY_WIDTH
+    config.text_autoclip_enable = False
+    res = pp(values, output, config=config)
+    res += pp(long_text_in_dict, output, config=config)
+    res += pp(long_text_in_list, output, config=config)
     return res
 
 inline_repr = [
@@ -176,7 +182,8 @@ inline_repr = [
 ]
 
 def test_inline_repr_out_of_range(output=True):
-    S.max_depth = 1
-    S.string_break_method = C._STRING_BREAK_BY_WIDTH
-    S.string_break_width = 40
-    return pp(inline_repr, output)
+    config = Config()
+    config.max_depth = 1
+    config.string_break_method = C._STRING_BREAK_BY_WIDTH
+    config.string_break_width = 40
+    return pp(inline_repr, output, config=config)

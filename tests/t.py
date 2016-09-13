@@ -27,8 +27,7 @@ else:
     unicode = str
     pyv = 3
 
-from beeprint import beeprint as pp, pyv
-from beeprint import settings as S 
+from beeprint import pp, pyv
 from beeprint import constants as C 
 
 try:
@@ -92,10 +91,6 @@ args = {
     "inst_test": inst_test,
     "builtin_test": builtin_test,
 }
-
-def out_of_range():
-    S.max_depth = 1
-    pp(df.out_of_range)
 
 def main():
     if len(sys.argv) == 1:

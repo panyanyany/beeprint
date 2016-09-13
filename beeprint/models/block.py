@@ -9,8 +9,8 @@ import inspect
 
 from beeprint import utils
 from beeprint import helper
-from beeprint import settings as S
 from beeprint import constants as C
+from beeprint.config import Config
 from beeprint.debug_kit import debug
 from beeprint.utils import is_newline_obj, is_class_instance, pyv, _unicode
 from beeprint.helper import (object_attr_default_filter, dict_key_filter, _b, 
@@ -27,7 +27,8 @@ from beeprint.models.wrapper import StringWrapper
 class Block(object):
     ctx = None
 
-    def __init__(self, ctx):
+    def __init__(self, config, ctx):
+        self.config = config
         self.ctx = ctx
         self.ctx.element_ending = self.get_element_ending()
 
@@ -64,7 +65,7 @@ class Block(object):
                 if elements.index(self.ctx.obj) == len(elements)-1:
                     tail = u''
             elif is_class_instance(value) or utils.is_class(value):
-                if self.ctx.indent_cnt >= S.max_depth:
+                if self.ctx.indent_cnt >= self.config.max_depth:
                     # if reach max depth, the value would be repr as one-line string
                     # so comma is need
                     pass
@@ -85,7 +86,7 @@ class Block(object):
         obj = self.ctx.obj
         position = self.ctx.position
 
-        debug(C._DL_FUNC_, 
+        debug(self.config, C._DL_FUNC_, 
               indent_cnt,
               ('obj:{} indent_cnt:{} position:{:b}'.format(
                   obj, indent_cnt, position)))
@@ -94,36 +95,38 @@ class Block(object):
 
         tail = self.ctx.element_ending
         block_ending = u''
-        debug(C._DL_STATEMENT, indent_cnt, 'tail, block_ending: ' + str([tail, block_ending]))
+        debug(self.config, C._DL_STATEMENT, indent_cnt, 'tail, block_ending: ' + str([tail, block_ending]))
 
-        if S.max_depth <= indent_cnt:
-            if S.newline or position & C._AS_ELEMENT_:
-                ret = ustr(indent_cnt * S.indent_char)
+        if self.config.max_depth <= indent_cnt:
+            if self.config.newline or position & C._AS_ELEMENT_:
+                ret = ustr(indent_cnt * self.config.indent_char)
             else:
                 ret = ustr(" ")
 
-            rb = ReprBlock(self.ctx, handlers=[ReprStringHandlerInlineRepr(),
-                                               ReprOthersHandlerInlineRepr()])
+            rb = ReprBlock(self.config, self.ctx, handlers=[
+                ReprStringHandlerInlineRepr(self.config), 
+                ReprOthersHandlerInlineRepr(self.config)])
             ret += str(rb) + tail + '\n'
             return _b(ret)
 
         if isinstance(obj, dict):
-            debug(C._DL_STATEMENT, indent_cnt, 'is dict')
-            ret += str(DictBlock(self.ctx))
+            debug(self.config, C._DL_STATEMENT, indent_cnt, 'is dict')
+            ret += str(DictBlock(self.config, self.ctx))
         elif isinstance(obj, list):
-            debug(C._DL_STATEMENT, indent_cnt, 'is list')
-            ret += str(ListBlock(self.ctx))
+            debug(self.config, C._DL_STATEMENT, indent_cnt, 'is list')
+            ret += str(ListBlock(self.config, self.ctx))
         elif isinstance(obj, tuple):
-            debug(C._DL_STATEMENT, indent_cnt, 'is tuple')
-            ret += str(TupleBlock(self.ctx))
+            debug(self.config, C._DL_STATEMENT, indent_cnt, 'is tuple')
+            ret += str(TupleBlock(self.config, self.ctx))
         elif is_extendable(obj):
-            debug(C._DL_STATEMENT, indent_cnt, 'is extendable')
-            ret += str(ClassBlock(self.ctx))
+            debug(self.config, C._DL_STATEMENT, indent_cnt, 'is extendable')
+            ret += str(ClassBlock(self.config, self.ctx))
         else:
-            debug(C._DL_STATEMENT, indent_cnt, 'is simple type')
-            rb = ReprBlock(self.ctx, handlers=[ReprStringHandlerMultiLiner(), 
-                                               ReprOthersHandler()])
-            ret += _b(indent_cnt * S.indent_char + str(rb) + ustr(tail + '\n'))
+            debug(self.config, C._DL_STATEMENT, indent_cnt, 'is simple type')
+            rb = ReprBlock(self.config, self.ctx, handlers=[
+                ReprStringHandlerMultiLiner(self.config), 
+                ReprOthersHandler(self.config)])
+            ret += _b(indent_cnt * self.config.indent_char + str(rb) + ustr(tail + '\n'))
 
         return ret
 
@@ -141,7 +144,7 @@ class ClassBlock(Block):
             except Exception as e:
                 continue
 
-            if object_attr_default_filter(o, attr_name, attr):
+            if object_attr_default_filter(self.config, o, attr_name, attr):
                 continue
 
             props.append((attr_name, attr))
@@ -178,7 +181,7 @@ class ClassBlock(Block):
         o = self.ctx.obj
         position = self.ctx.position
 
-        debug(C._DL_FUNC_, indent_cnt,
+        debug(self.config, C._DL_FUNC_, indent_cnt,
               ('obj:{} indent_cnt:{} position:{:b}'.format(
                   o, indent_cnt, position)))
 
@@ -186,12 +189,12 @@ class ClassBlock(Block):
 
         tail = self.ctx.element_ending
         block_ending = self.get_block_ending()
-        debug(C._DL_STATEMENT, indent_cnt, 'tail, block_ending: ' + str([tail, block_ending]))
+        debug(self.config, C._DL_STATEMENT, indent_cnt, 'tail, block_ending: ' + str([tail, block_ending]))
 
         # {
         _leading = ustr('')
         if position & C._AS_ELEMENT_:
-            _leading += S.indent_char * indent_cnt
+            _leading += self.config.indent_char * indent_cnt
         elif position & C._AS_VALUE_:
             _leading += ustr('')
 
@@ -232,7 +235,7 @@ class ClassBlock(Block):
             ctx.parent = self
             ctx.position = C._AS_CLASS_ELEMENT_
             ctx.indent_cnt = self.ctx.indent_cnt + 1
-            ret += str(PairBlock(ctx))
+            ret += str(PairBlock(self.config, ctx))
 
         # }
         if props_cnt == 0:
@@ -244,12 +247,12 @@ class ClassBlock(Block):
 
 class DictBlock(Block):
 
-    def __init__(self, ctx):
+    def __init__(self, config, ctx):
         ctx.__dict__.setdefault('position', C._AS_VALUE_)
-        super(self.__class__, self).__init__(ctx)
+        super(self.__class__, self).__init__(config, ctx)
 
     def get_elements(self):
-        if not S.dict_ordered_key_enable:
+        if not self.config.dict_ordered_key_enable:
             return self.ctx.obj.items()
 
         def items(self):
@@ -265,17 +268,17 @@ class DictBlock(Block):
         o = self.ctx.obj
         position = self.ctx.position
 
-        debug(C._DL_FUNC_, indent_cnt,
+        debug(self.config, C._DL_FUNC_, indent_cnt,
               ('obj:{} indent_cnt:{} position:{:b}'.format(
                   o, indent_cnt, position)))
 
         ret = ustr('')
         tail = self.ctx.element_ending
         block_ending = self.get_block_ending()
-        debug(C._DL_STATEMENT, indent_cnt, 'tail, block_ending: ' + str([tail, block_ending]))
+        debug(self.config, C._DL_STATEMENT, indent_cnt, 'tail, block_ending: ' + str([tail, block_ending]))
         # {
-        if S.newline or position & C._AS_ELEMENT_:
-            ret += _b(S.indent_char * indent_cnt + ustr('{') + ustr('\n'))
+        if self.config.newline or position & C._AS_ELEMENT_:
+            ret += _b(self.config.indent_char * indent_cnt + ustr('{') + ustr('\n'))
         else:
             ret += _b(ustr('{') + ustr('\n'))
 
@@ -288,18 +291,18 @@ class DictBlock(Block):
             ctx.parent = self
             ctx.position = C._AS_DICT_ELEMENT_
             ctx.indent_cnt = self.ctx.indent_cnt + 1
-            ret += str(PairBlock(ctx))
+            ret += str(PairBlock(self.config, ctx))
 
         # }
-        ret += _b(S.indent_char * indent_cnt + '}' + ustr(tail + block_ending))
+        ret += _b(self.config.indent_char * indent_cnt + '}' + ustr(tail + block_ending))
 
         return ret
 
 class ListBlock(Block):
 
-    def __init__(self, ctx):
+    def __init__(self, config, ctx):
         ctx.__dict__.setdefault('position', C._AS_VALUE_)
-        super(self.__class__, self).__init__(ctx)
+        super(self.__class__, self).__init__(config, ctx)
 
     def get_elements(self):
         return self.ctx.obj
@@ -312,24 +315,25 @@ class ListBlock(Block):
 
         tail = self.ctx.element_ending
         block_ending = self.get_block_ending()
-        debug(C._DL_STATEMENT, indent_cnt, 'tail, block_ending: ' + str([tail, block_ending]))
+        debug(self.config, C._DL_STATEMENT, indent_cnt, 'tail, block_ending: ' + str([tail, block_ending]))
 
         '所有元素显示在同一行'
-        if S.list_in_line:
+        if self.config.list_in_line:
             _f = map(
                 lambda e: (not (is_extendable(e) or 
-                                too_long(indent_cnt, position, repr_block(e)))), 
+                                too_long(self.config.indent_char, 
+                                         indent_cnt, position, repr_block(e)))), 
                 o)
             if all(_f):
                 _o = map(lambda e: repr_block(e), o)
-                if S.newline or position & C._AS_ELEMENT_:
-                    ret += ustr(S.indent_char * indent_cnt)
+                if self.config.newline or position & C._AS_ELEMENT_:
+                    ret += ustr(self.config.indent_char * indent_cnt)
                 ret += ustr("[") + ', '.join(_o) + ustr("]" + tail + block_ending)
                 return _b(ret)
 
         # [
-        if S.newline or position & C._AS_ELEMENT_:
-            ret += _b(S.indent_char * indent_cnt + ustr('[') + ustr('\n'))
+        if self.config.newline or position & C._AS_ELEMENT_:
+            ret += _b(self.config.indent_char * indent_cnt + ustr('[') + ustr('\n'))
         else:
             ret += _b(ustr('[') + ustr('\n'))
 
@@ -340,10 +344,10 @@ class ListBlock(Block):
             ctx.parent = self
             ctx.indent_cnt = self.ctx.indent_cnt + 1
             ctx.position = C._AS_ELEMENT_ | C._AS_LIST_ELEMENT_
-            ret += str(Block(ctx))
+            ret += str(Block(self.config, ctx))
 
         # ]
-        ret += _b(S.indent_char * indent_cnt + ustr(']' + tail + block_ending))
+        ret += _b(self.config.indent_char * indent_cnt + ustr(']' + tail + block_ending))
 
         return ret
 
@@ -351,9 +355,9 @@ class ListBlock(Block):
 
 class TupleBlock(Block):
 
-    def __init__(self, ctx):
+    def __init__(self, config, ctx):
         ctx.__dict__.setdefault('position', C._AS_VALUE_)
-        super(self.__class__, self).__init__(ctx)
+        super(self.__class__, self).__init__(config, ctx)
 
     def get_elements(self):
         return self.ctx.obj
@@ -363,7 +367,7 @@ class TupleBlock(Block):
         o = self.ctx.obj
         position = self.ctx.position
 
-        debug(C._DL_FUNC_, 
+        debug(self.config, C._DL_FUNC_, 
               indent_cnt,
               ('obj:{} indent_cnt:{} position:{:b}'.format(
                   o, indent_cnt, position)))
@@ -371,20 +375,20 @@ class TupleBlock(Block):
 
         tail = self.ctx.element_ending
         block_ending = self.get_block_ending()
-        debug(C._DL_STATEMENT, indent_cnt, 'tail, block_ending: ' + str([tail, block_ending]))
+        debug(self.config, C._DL_STATEMENT, indent_cnt, 'tail, block_ending: ' + str([tail, block_ending]))
 
-        if S.tuple_in_line:
+        if self.config.tuple_in_line:
             _f = map(lambda e: not is_extendable(e), o)
             if all(_f):
                 _o = map(lambda e: repr_block(e), o)
-                if S.newline or position & C._AS_ELEMENT_:
-                    ret += ustr(S.indent_char * indent_cnt)
+                if self.config.newline or position & C._AS_ELEMENT_:
+                    ret += ustr(self.config.indent_char * indent_cnt)
                 ret += _b(ustr("(") + ', '.join(_o) + ')' + tail + block_ending)
                 return ret
 
         # (
-        if S.newline or position & C._AS_ELEMENT_:
-            ret += _b(S.indent_char * indent_cnt + ustr('(\n'))
+        if self.config.newline or position & C._AS_ELEMENT_:
+            ret += _b(self.config.indent_char * indent_cnt + ustr('(\n'))
         else:
             ret += _b(ustr('(\n'))
 
@@ -397,7 +401,7 @@ class TupleBlock(Block):
                              ))
 
         # )
-        ret += _b(S.indent_char * indent_cnt + ustr(')' + tail + block_ending))
+        ret += _b(self.config.indent_char * indent_cnt + ustr(')' + tail + block_ending))
 
         return ret
 
@@ -427,29 +431,29 @@ class PairBlock(Block):
         name, val = self.ctx.obj
         position = self.ctx.position
 
-        debug(C._DL_FUNC_, indent_cnt,
+        debug(self.config, C._DL_FUNC_, indent_cnt,
               ('key:{}, indent_cnt:{}, position:{:b}'.format(
                   name, indent_cnt, position)))
         ret = ustr('')
 
         tail = self.ctx.element_ending
         block_ending = self.get_block_ending(val)
-        debug(C._DL_STATEMENT, indent_cnt, 'tail, block_ending: ' + str([tail, block_ending]))
+        debug(self.config, C._DL_STATEMENT, indent_cnt, 'tail, block_ending: ' + str([tail, block_ending]))
 
         key = self.ctx.key_expr
 
-        ret += _b(S.indent_char * indent_cnt + key + ':')
-        if is_extendable(val) and S.max_depth > indent_cnt:
+        ret += _b(self.config.indent_char * indent_cnt + key + ':')
+        if is_extendable(val) and self.config.max_depth > indent_cnt:
             # value need to be dispalyed on new line
             # including: 
             #   class type & class instance
             #   function type
-            if S.newline or (is_newline_obj(val) and
+            if self.config.newline or (is_newline_obj(val) and
                                  position & C._AS_ELEMENT_):
                 ret += _b(ustr('\n'))
                 indent_cnt = indent_cnt + 1
                 position = C._AS_ELEMENT_
-                debug(C._DL_STATEMENT, indent_cnt, 'make newline')
+                debug(self.config, C._DL_STATEMENT, indent_cnt, 'make newline')
             # value will be dispalyed immediately after one space
             else:
                 ret += _b(ustr(" "))
@@ -460,17 +464,19 @@ class PairBlock(Block):
             ctx.parent = self
             ctx.position =  position
             ctx.indent_cnt = indent_cnt
-            ret += str(Block(ctx)) + ustr(tail + block_ending)
+            ret += str(Block(self.config, ctx)) + ustr(tail + block_ending)
         else:
             ctx = self.ctx.clone()
             ctx.obj = val
-            if S.max_depth <= indent_cnt:
-                rb = ReprBlock(ctx, handlers=[ReprStringHandlerInlineRepr(),
-                                              ReprOthersHandlerInlineRepr()])
+            if self.config.max_depth <= indent_cnt:
+                rb = ReprBlock(self.config, ctx, handlers=[
+                    ReprStringHandlerInlineRepr(self.config), 
+                    ReprOthersHandlerInlineRepr(self.config)])
                 ret += _b(ustr(" " + str(rb) + tail + block_ending))
             else:
-                rb = ReprBlock(ctx, handlers=[ReprStringHandlerMultiLiner(), 
-                                              ReprOthersHandler()])
+                rb = ReprBlock(self.config, ctx, handlers=[
+                    ReprStringHandlerMultiLiner(self.config), 
+                    ReprOthersHandler(self.config)])
                 ret += _b(ustr(" ") + str(rb) + ustr(tail + block_ending))
 
         return ret
@@ -494,7 +500,7 @@ class Context(object):
         self.obj = None
         self.parent = None
 
-        self.indent_char = S.indent_char
+        self.indent_char = Config.indent_char
         self.position = C._AS_ELEMENT_
         self.indent_cnt = 0
 
@@ -538,15 +544,18 @@ class Context(object):
 
 
 def repr_block(obj):
-    return str(ReprBlock(Context(obj=obj)))
+    return str(ReprBlock(Config(), Context(obj=obj)))
 
 
 class ReprBlock(Block):
     """like repr(), but provides more functions"""
 
-    def __init__(self, ctx, handlers=None):
+    def __init__(self, config, ctx, handlers=None):
+        self.config = config
         self.ctx = ctx
-        self.handlers = handlers or [ReprStringHandler(), ReprOthersHandler()]
+        self.handlers = handlers or [
+            ReprStringHandler(self.config), 
+            ReprOthersHandler(self.config)]
         self.typ = ReprBlock.ReprType(ctx.obj)
 
     def build_block(self):
@@ -557,6 +566,9 @@ class ReprBlock(Block):
         raise Exception("no handlers")
 
     class Handler(object):
+
+        def __init__(self, config):
+            self.config = config
         
         def accept(self, typ):
             raise Exception("Unimplement method")
@@ -630,10 +642,10 @@ class ReprStringHandler(ReprBlock.Handler):
     def __call__(self, ctx, typ):
         obj = ctx.obj
         if typ.is_all(typ._BYTES_):
-            obj = obj.decode(S.encoding)
+            obj = obj.decode(self.config.encoding)
 
         ctx.obj = obj = self.escape(ustr(obj))
-        wrapper = StringWrapper(typ)
+        wrapper = StringWrapper(self.config, typ)
 
         return self.rearrenge(ctx, typ, wrapper)
 
@@ -647,7 +659,8 @@ class ReprStringHandlerMultiLiner(ReprStringHandler):
 
         left_margin = calc_left_margin(ctx, wrapper)
         # calculate availiable width for string
-        a_width = get_line_width() - left_margin
+        a_width = get_line_width(self.config.string_break_method,
+                                 self.config.string_break_width) - left_margin
 
         if a_width > 0:
             seg_list = break_string(
@@ -660,8 +673,8 @@ class ReprStringHandlerMultiLiner(ReprStringHandler):
                 wrapper.rqm + 
                 ctx.element_ending,
             )
-            indent_char_width = calc_width(S.indent_char)
-            left_margin_chars = (left_margin // indent_char_width * S.indent_char + 
+            indent_char_width = calc_width(self.config.indent_char)
+            left_margin_chars = (left_margin // indent_char_width * self.config.indent_char + 
                                  left_margin % indent_char_width * ' ')
             for i in range(1, len(seg_list)):
                 seg_list[i] = ''.join([
@@ -669,12 +682,12 @@ class ReprStringHandlerMultiLiner(ReprStringHandler):
                     seg_list[i],
                 ])
 
-            if (S.text_autoclip_enable and 
-                    S.text_autoclip_method == C._TEXT_AUTOCLIP_BY_LINE):
+            if (self.config.text_autoclip_enable and 
+                    self.config.text_autoclip_method == C._TEXT_AUTOCLIP_BY_LINE):
                 lines_cnt = len(seg_list)
-                if lines_cnt > S.text_autoclip_maxline:
-                    seg_list = seg_list[:S.text_autoclip_maxline]
-                    hidden_lines = lines_cnt - S.text_autoclip_maxline
+                if lines_cnt > self.config.text_autoclip_maxline:
+                    seg_list = seg_list[:self.config.text_autoclip_maxline]
+                    hidden_lines = lines_cnt - self.config.text_autoclip_maxline
                     plural_sign = '' if hidden_lines == 1 else 's'
                     seg_list.append("%s...(%d hidden line%s)" % (left_margin_chars, hidden_lines, plural_sign))
             ctx.obj = "\n".join(seg_list)
@@ -695,7 +708,10 @@ class ReprStringHandlerInlineRepr(ReprStringHandler):
     """repr string object in one line"""
 
     def rearrenge(self, ctx, typ, wrapper):
-        shrink_inner_string(ctx, wrapper)
+        shrink_inner_string(ctx, 
+                            self.config.string_break_method,
+                            self.config.string_break_width,
+                            wrapper)
         return wrapper.wrap(ctx.obj)
 
 
@@ -704,6 +720,9 @@ class ReprOthersHandlerInlineRepr(ReprOthersHandler):
     
     def __call__(self, ctx, typ):
         ctx.obj = ustr(repr(ctx.obj))
-        shrink_inner_string(ctx, None)
+        shrink_inner_string(ctx, 
+                            self.config.string_break_method,
+                            self.config.string_break_width,
+                            None)
 
         return ctx.obj

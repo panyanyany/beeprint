@@ -11,8 +11,8 @@ BEEPRINT_PATH = os.path.abspath(os.path.join(CUR_SCRIPT_PATH, '..'))
 sys.path.append(BEEPRINT_PATH)
 
 from beeprint import pyv
-from beeprint import beeprint as pp
-from beeprint import settings as S
+from beeprint import pp
+from beeprint import Config
 from beeprint import constants as C
 
 try:
@@ -41,39 +41,38 @@ class TestSimpleTypes(TestBase):
 
     def test_string(self):
         # string literal
-        # S.debug = True
-        S.str_display_not_prefix_u = False
-        S.str_display_not_prefix_b = False
+        config = Config()
+        config.str_display_not_prefix_u = False
+        config.str_display_not_prefix_b = False
         if pyv == 2:
-            self.assertEqual(pp("plain string", output=False), "b'plain string'\n")
+            self.assertEqual(pp("plain string", output=False, config=config), "b'plain string'\n")
         elif pyv == 3:
-            self.assertEqual(pp("plain string", output=False), "u'plain string'\n")
+            self.assertEqual(pp("plain string", output=False, config=config), "u'plain string'\n")
 
         # unicode string
         s = u'unicode string'
-        self.assertEqual(pp(s, output=False), u"u'unicode string'\n")
+        self.assertEqual(pp(s, output=False, config=config), u"u'unicode string'\n")
 
         # utf8 string
         s = u'utf8 string'.encode('utf-8')
-        self.assertEqual(pp(s, output=False), u"b'utf8 string'\n")
+        self.assertEqual(pp(s, output=False, config=config), u"b'utf8 string'\n")
 
         # gb2312 string
         s = u'gb2312 string'.encode('gb2312')
-        self.assertEqual(pp(s, output=False), u"b'gb2312 string'\n")
+        self.assertEqual(pp(s, output=False, config=config), u"b'gb2312 string'\n")
 
         # unicode special characters string
         s = u'\\'
-        self.assertEqual(pp(s, output=False), u"u'\\'\n")
+        self.assertEqual(pp(s, output=False, config=config), u"u'\\'\n")
 
         # utf8 special characters string
         s = u'\\'.encode("utf8")
-        self.assertEqual(pp(s, output=False), u"b'\\'\n")
+        self.assertEqual(pp(s, output=False, config=config), u"b'\\'\n")
 
     def test_complicate_data(self):
-        # S.str_display_not_prefix_u = False
-        # S.str_display_not_prefix_b = False
-        S.string_break_method = C._STRING_BREAK_BY_WIDTH
-        S.text_autoclip_enable = False
+        config = Config()
+        config.string_break_method = C._STRING_BREAK_BY_WIDTH
+        config.text_autoclip_enable = False
 
         ans = u""
         data_path = os.path.join(CUR_SCRIPT_PATH, 
@@ -81,14 +80,15 @@ class TestSimpleTypes(TestBase):
         with codecs.open(data_path, encoding="utf8") as fp:
             ans = fp.read()
 
-        res = pp(values, output=False)
-        res += pp(df.long_text_in_dict, output=False)
-        res += pp(df.long_text_in_list, output=False)
+        res = pp(values, output=False, config=config)
+        res += pp(df.long_text_in_dict, output=False, config=config)
+        res += pp(df.long_text_in_list, output=False, config=config)
         self.assertEqual(res, ans)
         # self.assertEqual(res, ans)
 
     def test_out_of_range(self):
-        S.max_depth = 1
+        config = Config()
+        config.max_depth = 1
 
         ans = ""
         rel_path = ''
@@ -103,7 +103,7 @@ class TestSimpleTypes(TestBase):
         # <definition.NormalClassOldStyle object at 0x7f2d9a61bac8>
         ans, _ = re.subn("at 0x[\d\w]+", "", ans)
 
-        res = pp(df.out_of_range, output=False)
+        res = pp(df.out_of_range, output=False, config=config)
         # delete object id, such as
         # <definition.NormalClassOldStyle object at 0x7f2d9a61bac8>
         res, _ = re.subn("at 0x[\d\w]+", "", res)
@@ -111,7 +111,8 @@ class TestSimpleTypes(TestBase):
         self.assertEqual(res, ans)
 
     def test_out_of_range_in_dict(self):
-        S.max_depth = 1
+        config = Config()
+        config.max_depth = 1
 
         ans = ""
         rel_path = 'data/out_of_range_in_dict.txt'
@@ -122,7 +123,7 @@ class TestSimpleTypes(TestBase):
         # <definition.NormalClassOldStyle object at 0x7f2d9a61bac8>
         ans, _ = re.subn("at 0x[\d\w]+", "", ans)
 
-        res = pp(df.out_of_range_in_dict, output=False)
+        res = pp(df.out_of_range_in_dict, output=False, config=config)
         # delete object id, such as
         # <definition.NormalClassOldStyle object at 0x7f2d9a61bac8>
         res, _ = re.subn("at 0x[\d\w]+", "", res)
@@ -132,7 +133,7 @@ class TestSimpleTypes(TestBase):
 
     def test_long_text(self):
         pass
-        # res = pp(long_text_en, output=False)
+        # res = pp(long_text_en, output=False, config=config)
         # self.assertEqual(res, ans)
 
 
@@ -184,8 +185,6 @@ class TestInlineRepr(TestBase):
             ans = fp.read()
 
         res = df.test_inline_repr_out_of_range(False)
-        S.string_break_width = 80
-        S.max_depth = 5
 
         self.assertEqual(ans, res)
 

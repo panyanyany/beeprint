@@ -26,7 +26,7 @@ A Real World Example
 Import beeprint as pp
 ---
 ```
-from beeprint import beeprint as pp
+from beeprint import pp
 ```
 
 Print dict

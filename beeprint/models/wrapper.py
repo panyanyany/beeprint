@@ -5,7 +5,6 @@ from __future__ import unicode_literals
 from __future__ import division
 
 from beeprint import constants as C
-from beeprint import settings as S
 
 
 class Wrapper(object):
@@ -22,14 +21,15 @@ class Wrapper(object):
 
 class StringWrapper(Wrapper):
 
-    def __init__(self, typ, lqm=None, rqm=None, etm=None):
+    def __init__(self, config, typ, lqm=None, rqm=None, etm=None):
 
+        self.config = config
         # ReprType
         self.typ = typ
         # left_quotation_mark
-        self.lqm = lqm or '\''
+        self.lqm = lqm or config.str_display_lqm
         # right_quotation_mark
-        self.rqm = rqm or '\''
+        self.rqm = rqm or config.str_display_rqm
         # encode type mark
         self.etm = etm
 
@@ -37,13 +37,13 @@ class StringWrapper(Wrapper):
             typ = self.typ
             self.etm = ''
             if typ.is_all(typ._UNICODE_):
-                if S.str_display_not_prefix_u:
+                if self.config.str_display_not_prefix_u:
                     pass
                 else:
                     self.etm = u'u'
             elif typ.is_all(typ._BYTES_):
                 # in py3, printed string will enclose with b''
-                if S.str_display_not_prefix_b:
+                if self.config.str_display_not_prefix_b:
                     pass
                 else:
                     self.etm = u'b'

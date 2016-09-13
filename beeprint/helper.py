@@ -9,17 +9,17 @@ import types
 import urwid
 
 from . import constants as C
-from . import settings as S
 from .utils import pyv, _unicode
 from .terminal_size import get_terminal_size
 from .lib import search_up_tree as sut
+from .config import Config
 # from kitchen.text import display
 
 if pyv == 2:
     range = xrange
 
 
-def ustr(s):
+def ustr(s, config=Config()):
     '''convert string into unicode'''
     res = u''
 
@@ -31,7 +31,7 @@ def ustr(s):
     elif isinstance(s, str):
         # in python 2/3, it's utf8
         # so decode to unicode
-        res += s.decode(S.encoding)
+        res += s.decode(config.encoding)
 
     return res
 
@@ -61,14 +61,14 @@ def is_extendable(obj):
     return isinstance(obj, dict) or hasattr(obj, '__dict__') or isinstance(obj, (tuple, list, types.FrameType))
 
 
-def object_attr_default_filter(obj, name, val):
+def object_attr_default_filter(config, obj, name, val):
     '过滤不需要的对象属性'
 
-    for propLeading in S.prop_leading_filters:
+    for propLeading in config.prop_leading_filters:
         if name.startswith(propLeading):
             return True
 
-    for prop in S.prop_filters:
+    for prop in config.prop_filters:
         # filter is a string
         if isinstance(prop, str) or isinstance(prop, _unicode):
             if name == prop:
@@ -88,8 +88,8 @@ def object_attr_default_filter(obj, name, val):
 def dict_key_filter(obj, name, val):
     return False
 
-def _b(s):
-    if S.write_to_buffer_when_execute:
-        S.buffer_handler.write(s)
-        S.buffer_handler.flush()
+def _b(s, config=Config()):
+    if config.write_to_buffer_when_execute:
+        config.buffer_handler.write(s)
+        config.buffer_handler.flush()
     return s
