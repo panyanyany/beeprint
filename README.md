@@ -127,5 +127,5 @@ pip install beeprint
 Settings
 ===
 
-> more on [settings.py](./beeprint/settings.py)
+> more on [config.py](./beeprint/config.py)
 
