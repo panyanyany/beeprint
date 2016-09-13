@@ -1,0 +1,4 @@
+{
+  'one': <definition.NormalClassNewStyle object at 0x7ff33c6dbc88>,
+  'two': <definition.NormalClassNewStyle object at 0x7ff33c6dbc88>,
+}

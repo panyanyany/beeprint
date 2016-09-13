@@ -1,8 +1,8 @@
 from setuptools import setup
 setup(
     name = 'beeprint',
-    packages = ['beeprint'], # this must be the same as the name above
-    version = '2.2.1',
+    packages = ['beeprint', 'beeprint.models', 'beeprint.helpers', 'beeprint.lib'], # this must be the same as the name above
+    version = '2.3.3',
     description = 'make your debug printing more friendly',
     author = 'Yangyang Pan',
     author_email = '568397440@qq.com',

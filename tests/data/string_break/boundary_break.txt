@@ -1,0 +1,9 @@
+[
+  {
+  },
+  'boundary testing string: 80col,new line part filled with x ................',
+  'boundary testing string: 81col,new line part filled with x ...............
+   x',
+  'boundary testing string: 82col,new line part filled with x ...............
+   xx',
+]

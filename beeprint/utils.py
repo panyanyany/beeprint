@@ -34,7 +34,7 @@ def is_pan_function(name, val):
     """detect pan-function which including function and bound method in python 3
     function and unbound method and bound method in python 2
     """
-    return inspect.isfunction(val) or inspect.ismethod(val)
+    return inspect.isfunction(val) or inspect.ismethod(val) or inspect.isbuiltin(val)
 
 def print_exc_plus():
     """
@@ -75,6 +75,9 @@ def is_newline_obj(o):
     return False
 
 def is_class_instance(o):
+    # print('%s: class instance: %s' % (inspect.isclass(o), o))
+    if o is None:
+        return False
     try:
         # to detect:
         # old-style class & new-style class
@@ -88,7 +91,19 @@ def is_class_instance(o):
             or inspect.isfunction(o)
             or inspect.ismethod(o)):
             return False
+        if isinstance(o, (int, float, list, dict, str, _unicode)):
+            return False
         return True
     except:
         pass
     return False
+
+def is_class(o):
+    # print('%s: class: %s' % (inspect.isclass(o), o))
+    return inspect.isclass(o)
+
+    if is_class_instance(o) or inspect.isfunction(o) or inspect.isbuiltin(o) or inspect.ismethod(o):
+        return False
+
+    return True
+

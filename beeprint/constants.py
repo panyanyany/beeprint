@@ -27,19 +27,16 @@ _AS_LIST_ELEMENT_ = \
 _AS_DICT_ELEMENT_ = 1 << 3
 _AS_CLASS_ELEMENT_ = 1 << 4
 
-# string type
-_ST_LITERAL_ = 1 # string literal depends on script's coding
-_ST_UNICODE_ = 2
-_ST_BYTES_ = 4
-_ST_UNDEFINED_ = 0
-
 # debug level
 _DL_MODULE_ = 1
 _DL_FUNC_ = 2
 _DL_STATEMENT = 3
 
 # long string 
-_TEXT_WRAP_BY_NONE = 0
-_TEXT_WRAP_BY_TERMINAL = 1
+_STRING_BREAK_BY_NONE = 0
+_STRING_BREAK_BY_TERMINAL = 1
 # accompany with S.text_wrap_width argument
-_TEXT_WRAP_BY_WIDTH = 2
+_STRING_BREAK_BY_WIDTH = 2
+
+_TEXT_AUTOCLIP_BY_LINE = 1
+# _TEXT_AUTOCLIP_BY_LENGTH = 2

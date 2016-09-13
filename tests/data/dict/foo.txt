@@ -1,0 +1,14 @@
+{
+  'entities': {
+    'hashtags': [],
+    'urls': [
+      {
+        'display_url': 'tumblr.com/xnr37hf0yz',
+        'expanded_url': 'http://tumblr.com/xnr37hf0yz',
+        'indices': [107, 126],
+        'url': 'http://t.co/cCIWIwg',
+      },
+    ],
+    'user_mentions': [],
+  },
+}

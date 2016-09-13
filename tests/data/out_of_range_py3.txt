@@ -1,0 +1,9 @@
+[
+  'nomarl\t\n1',
+  [1, [2], {'key': 'val'}],
+  <function EmptyFunc at 0x7fc4d15ba400>,
+  <class 'definition.EmptyClassOldStyle'>,
+  <class 'definition.EmptyClassNewStyle'>,
+  <definition.NormalClassOldStyle object at 0x7fc4d105f9e8>,
+  <definition.NormalClassNewStyle object at 0x7fc4d105fa20>,
+]
