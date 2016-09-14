@@ -36,7 +36,7 @@ def pp(o, output=True, max_depth=None, config=None):
     if output and not config.write_to_buffer_when_execute:
         try:
             print(res, end='')
-            return res
+            # return res
         except Exception as e:
             print_exc_plus()
             if type(e) is UnicodeEncodeError:

@@ -187,3 +187,14 @@ def test_inline_repr_out_of_range(output=True):
     config.string_break_method = C._STRING_BREAK_BY_WIDTH
     config.string_break_width = 40
     return pp(inline_repr, output, config=config)
+
+tuple_testing = (1, {'indict':(1,), 'z': 1},)
+
+def test_tuple(output=True):
+    config = Config()
+    return pp(tuple_testing, output, config=config)
+
+
+def test_class(output=True):
+    config = Config()
+    return pp(EmptyClassNewStyle, output, config=config)

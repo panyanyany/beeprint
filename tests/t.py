@@ -27,7 +27,7 @@ else:
     unicode = str
     pyv = 3
 
-from beeprint import pp, pyv
+from beeprint import pp, pyv, Config
 from beeprint import constants as C 
 
 try:
@@ -104,7 +104,11 @@ def main():
         # pp(tweet)
         # df.test_boundary_break()
         # df.test_complicate_data()
-        df.test_inline_repr_out_of_range()
+        # df.test_inline_repr_out_of_range()
+        df.test_class()
+        config = Config()
+        config.debug_level = 0
+        pp([df.EmptyClassNewStyle, (1,), df.NormalClassNewStyle], config=config)
 
         return
 

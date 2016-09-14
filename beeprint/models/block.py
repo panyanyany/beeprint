@@ -169,7 +169,10 @@ class ClassBlock(Block):
         
         So, the block of class(A) only need to do is just to add a newline to finish itself.
         """
-        return u''
+        if len(self.get_elements()) > 0:
+            return u''
+        else:
+            return super(self.__class__, self).get_element_ending()
 
     '''
     def get_block_ending(self):
@@ -240,7 +243,7 @@ class ClassBlock(Block):
         # }
         if props_cnt == 0:
             # right strip ':\n'
-            ret = ustr(ret[:-2] + u',\n')
+            ret = ustr(ret[:-2] + tail + '\n')
         else:
             ret += ustr(tail + block_ending)
         return ret
@@ -394,11 +397,12 @@ class TupleBlock(Block):
 
         # body
         for e in self.get_elements():
-            ret += str(Block(e, 
-                             self,
-                             position=C._AS_ELEMENT_ | C._AS_TUPLE_ELEMENT_,
-                             indent=indent_cnt + 1,
-                             ))
+            ctx = self.ctx.clone()
+            ctx.obj = e
+            ctx.parent = self
+            ctx.position = C._AS_ELEMENT_ | C._AS_TUPLE_ELEMENT_
+            ctx.indent_cnt += 1
+            ret += str(Block(self.config, ctx))
 
         # )
         ret += _b(self.config.indent_char * indent_cnt + ustr(')' + tail + block_ending))
