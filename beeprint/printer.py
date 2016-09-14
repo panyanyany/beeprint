@@ -8,6 +8,8 @@ import traceback
 import types
 import inspect
 
+from io import StringIO
+
 from .utils import pyv
 
 if pyv == 2:
@@ -32,19 +34,13 @@ def pp(o, output=True, max_depth=None, config=None):
     if max_depth:
         config.max_depth = max_depth
 
+    if not output:
+        config.stream = None
+
     res = str(Block(config, Context(obj=o)))
-    if output and not config.write_to_buffer_when_execute:
-        try:
-            print(res, end='')
-            # return res
-        except Exception as e:
-            print_exc_plus()
-            if type(e) is UnicodeEncodeError:
-                # UnicodeEncodeError: 'ascii' codec can't encode characters in
-                # position 35-36: ordinal not in range(128)
-                print(sys.getdefaultencoding())
-                print('res value type:', type(res))
-            else:
-                print('exception type :', type(e))
-    else:
+    if config.debug_level != 0:
+        if config.debug_delay:
+            print(config.debug_stream.getvalue())
+
+    if not output:
         return res

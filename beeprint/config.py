@@ -6,6 +6,7 @@ from __future__ import division
 import sys
 import types
 
+from io import StringIO
 from . import constants as C
 from . import utils
 
@@ -23,10 +24,8 @@ class Config(object):
     tuple_in_line = True
     list_in_line = True
 
-    # >> buffer
-    buffer_handler = sys.stdout
-    # use buffer_handler.flush() every print
-    write_to_buffer_when_execute = False
+    # >> stream
+    stream = sys.stdout
 
     # >> class control
     # 过滤以 x 开头的属性
@@ -41,6 +40,9 @@ class Config(object):
 
     # debug = False
     debug_level = 0
+    debug_stream = StringIO()
+    # print info after pp()
+    debug_delay = True
 
     # >> string control
     # united_str_coding_representation

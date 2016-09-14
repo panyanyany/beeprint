@@ -21,9 +21,9 @@ def debug(config, level, depth, text):
         frame_obj = frame_list[1][0]
         class_name = frame_obj.f_locals['self'].__class__.__name__
         caller_name = frame_list[1][3]
-        depth = len(frame_list) - 4
+        depth = len(frame_list) - 6
         if level == C._DL_FUNC_:
             depth -= 1
             text = class_name + '.' + caller_name + ': ' + text
         text = add_leading(depth, text)
-        print(text)
+        config.debug_stream.write(text + '\n')

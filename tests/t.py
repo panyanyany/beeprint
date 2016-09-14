@@ -105,10 +105,12 @@ def main():
         # df.test_boundary_break()
         # df.test_complicate_data()
         # df.test_inline_repr_out_of_range()
-        df.test_class()
         config = Config()
-        config.debug_level = 0
-        pp([df.EmptyClassNewStyle, (1,), df.NormalClassNewStyle], config=config)
+        config.max_depth = 3
+        config.debug_level = 9
+        # pp(sys.modules, config=config)
+        # df.test_sort_of_string()
+        df.test_class_last_el()
 
         return
 

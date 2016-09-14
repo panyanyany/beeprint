@@ -63,11 +63,11 @@ class TestSimpleTypes(TestBase):
 
         # unicode special characters string
         s = u'\\'
-        self.assertEqual(pp(s, output=False, config=config), u"u'\\'\n")
+        self.assertEqual(pp(s, output=False, config=config), u"u'\\\\'\n")
 
         # utf8 special characters string
         s = u'\\'.encode("utf8")
-        self.assertEqual(pp(s, output=False, config=config), u"b'\\'\n")
+        self.assertEqual(pp(s, output=False, config=config), u"b'\\\\'\n")
 
     def test_complicate_data(self):
         config = Config()
@@ -198,6 +198,19 @@ class TestInlineRepr(TestBase):
             ans = fp.read()
 
         res = df.test_inline_repr_out_of_range(False)
+
+        self.assertEqual(ans, res)
+
+
+class TestClass(TestBase):
+
+    def test_class_last_el(self):
+        rel_path = 'data/class/last_el.txt'
+        data_path = os.path.join(CUR_SCRIPT_PATH, rel_path)
+        with codecs.open(data_path, encoding='utf8') as fp:
+            ans = fp.read()
+
+        res = df.test_class_last_el(False)
 
         self.assertEqual(ans, res)
 

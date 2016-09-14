@@ -198,3 +198,26 @@ def test_tuple(output=True):
 def test_class(output=True):
     config = Config()
     return pp(EmptyClassNewStyle, output, config=config)
+
+sort_of_string = [
+    'normal',
+    u'unicode',
+    b'\xff\xfe',
+    '\xff\xfe',
+]
+
+def test_sort_of_string(output=True):
+    config = Config()
+    return pp(sort_of_string, output, config=config)
+
+
+class ReprMethodClassNewStyle(object):
+    def __repr__(self):
+        return "<Hey I'm ReprMethodClassNewStyle>"
+
+def test_class_last_el(output=True):
+    config = Config()
+    # config.debug_level = 9
+    rm = ReprMethodClassNewStyle()
+    nc = NormalClassNewStyle()
+    return pp([rm, nc, rm], output, config=config)

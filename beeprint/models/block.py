@@ -95,7 +95,8 @@ class Block(object):
 
         tail = self.ctx.element_ending
         block_ending = u''
-        debug(self.config, C._DL_STATEMENT, indent_cnt, 'tail, block_ending: ' + str([tail, block_ending]))
+        debug(self.config, C._DL_STATEMENT, 
+              indent_cnt, 'tail, block_ending: ' + str([tail, block_ending]))
 
         if self.config.max_depth <= indent_cnt:
             if self.config.newline or position & C._AS_ELEMENT_:
@@ -107,7 +108,7 @@ class Block(object):
                 ReprStringHandlerInlineRepr(self.config), 
                 ReprOthersHandlerInlineRepr(self.config)])
             ret += str(rb) + tail + '\n'
-            return _b(ret)
+            return _b(self.config, ret)
 
         if isinstance(obj, dict):
             debug(self.config, C._DL_STATEMENT, indent_cnt, 'is dict')
@@ -126,7 +127,7 @@ class Block(object):
             rb = ReprBlock(self.config, self.ctx, handlers=[
                 ReprStringHandlerMultiLiner(self.config), 
                 ReprOthersHandler(self.config)])
-            ret += _b(indent_cnt * self.config.indent_char + str(rb) + ustr(tail + '\n'))
+            ret += _b(self.config, indent_cnt * self.config.indent_char + str(rb) + ustr(tail + '\n'))
 
         return ret
 
@@ -188,11 +189,10 @@ class ClassBlock(Block):
               ('obj:{} indent_cnt:{} position:{:b}'.format(
                   o, indent_cnt, position)))
 
-        ret = ustr('')
-
         tail = self.ctx.element_ending
         block_ending = self.get_block_ending()
-        debug(self.config, C._DL_STATEMENT, indent_cnt, 'tail, block_ending: ' + str([tail, block_ending]))
+        debug(self.config, C._DL_STATEMENT, 
+              indent_cnt, 'tail, block_ending: ' + str([tail, block_ending]))
 
         # {
         _leading = ustr('')
@@ -202,18 +202,17 @@ class ClassBlock(Block):
             _leading += ustr('')
 
         if is_class_instance(o):
-            ret += _b(_leading + ustr('instance(%s):' %
-                                      o.__class__.__name__) + ustr('\n'))
+            ret = _leading + ustr('instance(%s):' % o.__class__.__name__) + '\n'
         elif inspect.isfunction(o):
-            ret += _b(_leading + ustr('function(%s):' % o.__name__) + ustr('\n'))
+            ret = _leading + ustr('function(%s):' % o.__name__) + '\n'
         elif inspect.isbuiltin(o):
-            ret += _b(_leading + ustr('builtin(%s):' % o.__name__) + ustr('\n'))
+            ret = _leading + ustr('builtin(%s):' % o.__name__) + '\n'
         elif inspect.ismethod(o):
-            ret += _b(_leading + ustr('method(%s):' % o.__name__) + ustr('\n'))
+            ret = _leading + ustr('method(%s):' % o.__name__) + '\n'
         else:
             '本身就是类，不是对象'
             try:
-                ret += _b(_leading + ustr('class(%s):' % o.__name__) + ustr('\n'))
+                ret = _b(self.config, _leading + ustr('class(%s):' % o.__name__) + ustr('\n'))
             except:
                 print(inspect.isclass(o))
                 print(o, dir(o))
@@ -221,8 +220,14 @@ class ClassBlock(Block):
 
         # body
         ele_ctnr = self.get_elements()
-
         props_cnt = len(ele_ctnr)
+
+        if props_cnt == 0:
+            # right strip ':\n'
+            ret = ret[:-2]
+
+        ret = _b(self.config, ret)
+
         for idx, key, val in ele_ctnr:
             '''
             '最后一个元素不需要再加(,)逗号'
@@ -241,11 +246,7 @@ class ClassBlock(Block):
             ret += str(PairBlock(self.config, ctx))
 
         # }
-        if props_cnt == 0:
-            # right strip ':\n'
-            ret = ustr(ret[:-2] + tail + '\n')
-        else:
-            ret += ustr(tail + block_ending)
+        ret += _b(self.config, tail + block_ending)
         return ret
 
 class DictBlock(Block):
@@ -260,7 +261,11 @@ class DictBlock(Block):
 
         def items(self):
             keys = list(self.ctx.obj.keys())
-            keys.sort()
+            try:
+                keys.sort()
+            except:
+                # if keys elements are type() objects, it can not be sort
+                keys.sort(key=lambda e: repr(e))
             for k in keys:
                 yield k, self.ctx.obj[k]
         return items(self)
@@ -281,9 +286,9 @@ class DictBlock(Block):
         debug(self.config, C._DL_STATEMENT, indent_cnt, 'tail, block_ending: ' + str([tail, block_ending]))
         # {
         if self.config.newline or position & C._AS_ELEMENT_:
-            ret += _b(self.config.indent_char * indent_cnt + ustr('{') + ustr('\n'))
+            ret += _b(self.config, self.config.indent_char * indent_cnt + ustr('{') + ustr('\n'))
         else:
-            ret += _b(ustr('{') + ustr('\n'))
+            ret += _b(self.config, ustr('{') + ustr('\n'))
 
         # body
         for k, v in self.get_elements():
@@ -297,7 +302,7 @@ class DictBlock(Block):
             ret += str(PairBlock(self.config, ctx))
 
         # }
-        ret += _b(self.config.indent_char * indent_cnt + '}' + ustr(tail + block_ending))
+        ret += _b(self.config, self.config.indent_char * indent_cnt + '}' + ustr(tail + block_ending))
 
         return ret
 
@@ -318,7 +323,9 @@ class ListBlock(Block):
 
         tail = self.ctx.element_ending
         block_ending = self.get_block_ending()
-        debug(self.config, C._DL_STATEMENT, indent_cnt, 'tail, block_ending: ' + str([tail, block_ending]))
+        debug(self.config, 
+              C._DL_FUNC_, 
+              indent_cnt, 'tail, block_ending: ' + str([tail, block_ending]))
 
         '所有元素显示在同一行'
         if self.config.list_in_line:
@@ -332,13 +339,13 @@ class ListBlock(Block):
                 if self.config.newline or position & C._AS_ELEMENT_:
                     ret += ustr(self.config.indent_char * indent_cnt)
                 ret += ustr("[") + ', '.join(_o) + ustr("]" + tail + block_ending)
-                return _b(ret)
+                return _b(self.config, ret)
 
         # [
         if self.config.newline or position & C._AS_ELEMENT_:
-            ret += _b(self.config.indent_char * indent_cnt + ustr('[') + ustr('\n'))
+            ret += _b(self.config, self.config.indent_char * indent_cnt + ustr('[') + ustr('\n'))
         else:
-            ret += _b(ustr('[') + ustr('\n'))
+            ret += _b(self.config, ustr('[') + ustr('\n'))
 
         # body
         for e in o:
@@ -350,7 +357,7 @@ class ListBlock(Block):
             ret += str(Block(self.config, ctx))
 
         # ]
-        ret += _b(self.config.indent_char * indent_cnt + ustr(']' + tail + block_ending))
+        ret += _b(self.config, self.config.indent_char * indent_cnt + ustr(']' + tail + block_ending))
 
         return ret
 
@@ -386,14 +393,14 @@ class TupleBlock(Block):
                 _o = map(lambda e: repr_block(e), o)
                 if self.config.newline or position & C._AS_ELEMENT_:
                     ret += ustr(self.config.indent_char * indent_cnt)
-                ret += _b(ustr("(") + ', '.join(_o) + ')' + tail + block_ending)
+                ret += _b(self.config, ustr("(") + ', '.join(_o) + ')' + tail + block_ending)
                 return ret
 
         # (
         if self.config.newline or position & C._AS_ELEMENT_:
-            ret += _b(self.config.indent_char * indent_cnt + ustr('(\n'))
+            ret += _b(self.config, self.config.indent_char * indent_cnt + ustr('(\n'))
         else:
-            ret += _b(ustr('(\n'))
+            ret += _b(self.config, ustr('(\n'))
 
         # body
         for e in self.get_elements():
@@ -405,7 +412,7 @@ class TupleBlock(Block):
             ret += str(Block(self.config, ctx))
 
         # )
-        ret += _b(self.config.indent_char * indent_cnt + ustr(')' + tail + block_ending))
+        ret += _b(self.config, self.config.indent_char * indent_cnt + ustr(')' + tail + block_ending))
 
         return ret
 
@@ -446,7 +453,7 @@ class PairBlock(Block):
 
         key = self.ctx.key_expr
 
-        ret += _b(self.config.indent_char * indent_cnt + key + ':')
+        ret += _b(self.config, self.config.indent_char * indent_cnt + key + ':')
         if is_extendable(val) and self.config.max_depth > indent_cnt:
             # value need to be dispalyed on new line
             # including: 
@@ -454,13 +461,13 @@ class PairBlock(Block):
             #   function type
             if self.config.newline or (is_newline_obj(val) and
                                  position & C._AS_ELEMENT_):
-                ret += _b(ustr('\n'))
+                ret += _b(self.config, ustr('\n'))
                 indent_cnt = indent_cnt + 1
                 position = C._AS_ELEMENT_
                 debug(self.config, C._DL_STATEMENT, indent_cnt, 'make newline')
             # value will be dispalyed immediately after one space
             else:
-                ret += _b(ustr(" "))
+                ret += _b(self.config, ustr(" "))
                 position = C._AS_VALUE_
 
             ctx = self.ctx.clone()
@@ -468,7 +475,8 @@ class PairBlock(Block):
             ctx.parent = self
             ctx.position =  position
             ctx.indent_cnt = indent_cnt
-            ret += str(Block(self.config, ctx)) + ustr(tail + block_ending)
+            ret += str(Block(self.config, ctx))
+            ret += _b(self.config, tail + block_ending)
         else:
             ctx = self.ctx.clone()
             ctx.obj = val
@@ -476,12 +484,12 @@ class PairBlock(Block):
                 rb = ReprBlock(self.config, ctx, handlers=[
                     ReprStringHandlerInlineRepr(self.config), 
                     ReprOthersHandlerInlineRepr(self.config)])
-                ret += _b(ustr(" " + str(rb) + tail + block_ending))
+                ret += _b(self.config, ustr(" " + str(rb) + tail + block_ending))
             else:
                 rb = ReprBlock(self.config, ctx, handlers=[
                     ReprStringHandlerMultiLiner(self.config), 
                     ReprOthersHandler(self.config)])
-                ret += _b(ustr(" ") + str(rb) + ustr(tail + block_ending))
+                ret += _b(self.config, ustr(" ") + str(rb) + ustr(tail + block_ending))
 
         return ret
 
@@ -636,7 +644,9 @@ class ReprStringHandler(ReprBlock.Handler):
     def accept(self, typ):
         return typ.is_string()
 
-    def escape(self, obj):
+    def escape(self, obj, typ):
+        if pyv == 2 or typ.is_all(typ._UNICODE_):
+            obj = obj.replace(u'\\', u'\\\\')
         obj = obj.replace(u'\n', u'\\n')
         obj = obj.replace(u'\r', u'\\r')
         obj = obj.replace(u'\t', u'\\t')
@@ -644,11 +654,17 @@ class ReprStringHandler(ReprBlock.Handler):
         return obj
 
     def __call__(self, ctx, typ):
-        obj = ctx.obj
         if typ.is_all(typ._BYTES_):
-            obj = obj.decode(self.config.encoding)
+            if pyv == 2:
+                try:
+                    # cat not process bytes like b'\xff\xfe'
+                    ctx.obj = ustr(ctx.obj)
+                except:
+                    ctx.obj = ''.join(map(lambda e: '\\x' + e.encode('hex'), ctx.obj))
+            else:
+                ctx.obj = str(ctx.obj).strip("b'")
 
-        ctx.obj = obj = self.escape(ustr(obj))
+        ctx.obj = self.escape(ustr(ctx.obj), typ)
         wrapper = StringWrapper(self.config, typ)
 
         return self.rearrenge(ctx, typ, wrapper)
