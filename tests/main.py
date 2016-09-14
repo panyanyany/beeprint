@@ -176,6 +176,19 @@ class TestDict(TestBase):
         self.assertEqual(ans, res)
 
 
+class TestTuple(TestBase):
+
+    def test_ordered_keys(self):
+        rel_path = 'data/tuple/simple.txt'
+        data_path = os.path.join(CUR_SCRIPT_PATH, rel_path)
+        with codecs.open(data_path, encoding='utf8') as fp:
+            ans = fp.read()
+
+        res = df.test_tuple(False)
+
+        self.assertEqual(ans, res)
+
+
 class TestInlineRepr(TestBase):
 
     def test_inline_repr_out_of_range(self):

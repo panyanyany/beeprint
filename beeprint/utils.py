@@ -91,7 +91,7 @@ def is_class_instance(o):
             or inspect.isfunction(o)
             or inspect.ismethod(o)):
             return False
-        if isinstance(o, (int, float, list, dict, str, _unicode)):
+        if isinstance(o, (int, float, list, tuple, dict, str, _unicode)):
             return False
         return True
     except:
