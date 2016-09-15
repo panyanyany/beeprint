@@ -12,7 +12,7 @@ from beeprint import helper
 from beeprint import constants as C
 from beeprint.config import Config
 from beeprint.debug_kit import debug
-from beeprint.utils import is_newline_obj, is_class_instance, pyv, _unicode
+from beeprint.utils import is_newline_obj, is_class_instance, pyv, _unicode, get_name
 from beeprint.helper import (object_attr_default_filter, dict_key_filter, _b, 
                              ustr, is_extendable)
 from beeprint.lib import search_up_tree as sut
@@ -212,7 +212,7 @@ class ClassBlock(Block):
         else:
             '本身就是类，不是对象'
             try:
-                ret = _b(self.config, _leading + ustr('class(%s):' % o.__name__) + ustr('\n'))
+                ret = _leading + 'class(%s):' % get_name(o) + '\n'
             except:
                 print(inspect.isclass(o))
                 print(o, dir(o))
@@ -421,6 +421,7 @@ class PairBlock(Block):
     def __init__(self, *args, **kwargs):
         super(self.__class__, self).__init__(*args, **kwargs)
         self.ctx.key = self.ctx.obj[0]
+        self.ctx.key_expr = self.get_key(self.ctx.position, self.ctx.key)
 
     @staticmethod
     def get_key(position, name):
@@ -449,12 +450,15 @@ class PairBlock(Block):
 
         tail = self.ctx.element_ending
         block_ending = self.get_block_ending(val)
-        debug(self.config, C._DL_STATEMENT, indent_cnt, 'tail, block_ending: ' + str([tail, block_ending]))
+        debug(self.config, C._DL_STATEMENT, 
+              indent_cnt, 'tail, block_ending: ' + str([tail, block_ending]))
 
         key = self.ctx.key_expr
 
         ret += _b(self.config, self.config.indent_char * indent_cnt + key + ':')
         if is_extendable(val) and self.config.max_depth > indent_cnt:
+            # still in of range, and can be expanded
+
             # value need to be dispalyed on new line
             # including: 
             #   class type & class instance
@@ -481,14 +485,15 @@ class PairBlock(Block):
             ctx = self.ctx.clone()
             ctx.obj = val
             if self.config.max_depth <= indent_cnt:
-                rb = ReprBlock(self.config, ctx, handlers=[
-                    ReprStringHandlerInlineRepr(self.config), 
-                    ReprOthersHandlerInlineRepr(self.config)])
+                # reach max_depth, just show brief message
+                rb = ReprBlock(self.config, ctx, 
+                               handlers=[ReprStringHandlerInlineRepr(self.config), 
+                                         ReprOthersHandlerInlineRepr(self.config)])
                 ret += _b(self.config, ustr(" " + str(rb) + tail + block_ending))
             else:
-                rb = ReprBlock(self.config, ctx, handlers=[
-                    ReprStringHandlerMultiLiner(self.config), 
-                    ReprOthersHandler(self.config)])
+                rb = ReprBlock(self.config, ctx, 
+                               handlers=[ReprStringHandlerMultiLiner(self.config), 
+                                         ReprOthersHandler(self.config)])
                 ret += _b(self.config, ustr(" ") + str(rb) + ustr(tail + block_ending))
 
         return ret
@@ -521,6 +526,7 @@ class Context(object):
 
         self.element_ending = None
         self.key = None
+        self.key_expr = ''
 
         self.__dict__.update(**attrs)
 
@@ -531,18 +537,6 @@ class Context(object):
     @property
     def indent(self):
         return self.indent_char*self.indent_cnt
-
-    @property
-    def key_expr(self):
-        if self.key is None:
-            return ''
-        if self.position & C._AS_CLASS_ELEMENT_:
-            # class method name or attribute name no need to add u or b prefix
-            key = ustr(self.key)
-        else:
-            key = repr_block(self.key)
-
-        return key
 
     @property
     def sep_expr(self):
@@ -641,6 +635,11 @@ class ReprBlock(Block):
 class ReprStringHandler(ReprBlock.Handler):
     """handle repr while processing string object like unicode, bytes, str"""
 
+    def __init__(self, *args, **kwargs):
+        # whether to quote the string
+        self.do_quote = kwargs.pop('do_quote', None) or True
+        super(ReprStringHandler, self).__init__(*args, **kwargs)
+
     def accept(self, typ):
         return typ.is_string()
 
@@ -665,7 +664,10 @@ class ReprStringHandler(ReprBlock.Handler):
                 ctx.obj = str(ctx.obj).strip("b'")
 
         ctx.obj = self.escape(ustr(ctx.obj), typ)
-        wrapper = StringWrapper(self.config, typ)
+        if self.do_quote:
+            wrapper = StringWrapper(self.config, typ)
+        else:
+            wrapper = StringWrapper(self.config, typ, lqm='', rqm='')
 
         return self.rearrenge(ctx, typ, wrapper)
 

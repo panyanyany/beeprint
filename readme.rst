@@ -15,9 +15,7 @@ Features
 Contents
 ========
 
--  `Examples <#examples>`__
--  `Installation <#installation>`__
--  `Settings <#settings>`__
+.. contents:: 
 
 Examples
 ========
@@ -28,7 +26,6 @@ A Real World Example
 .. figure:: https://github.com/panyanyany/beeprint/raw/master/docs/images/a_real_world_example.png
    :alt: A Real World Example
 
-   A Real World Example
 
 Import beeprint as pp
 ---------------------

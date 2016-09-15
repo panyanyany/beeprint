@@ -162,6 +162,16 @@ class TestAutoClip(TestBase):
 
         self.assertEqual(ans, res)
 
+    def test_no_room(self):
+        rel_path = 'data/auto_clip/no_room.txt'
+        data_path = os.path.join(CUR_SCRIPT_PATH, rel_path)
+        with codecs.open(data_path, encoding='utf8') as fp:
+            ans = fp.read()
+
+        res = df.test_autoclip_no_room(False)
+
+        self.assertEqual(ans, res)
+
 
 class TestDict(TestBase):
 

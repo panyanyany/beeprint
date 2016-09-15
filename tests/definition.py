@@ -217,7 +217,34 @@ class ReprMethodClassNewStyle(object):
 
 def test_class_last_el(output=True):
     config = Config()
-    # config.debug_level = 9
     rm = ReprMethodClassNewStyle()
     nc = NormalClassNewStyle()
     return pp([rm, nc, rm], output, config=config)
+
+
+class OuterClass(object):
+    class InnerClass(object):
+        pass
+
+
+def test_inner_class(output=True):
+    config = Config()
+    return pp(OuterClass, output, config=config)
+
+
+class ForNoRoom(object):
+    xxxxxxxxxxxxxxxxxxx = 'ooooooooooooooooooooooo'
+
+autoclip_no_room = [
+    ['.'*80, {}],
+    {'akey': 'value'*3},
+    ForNoRoom,
+]
+
+def test_autoclip_no_room(output=True):
+    config = Config()
+    # config.debug_level = 9
+    config.max_depth = 2
+    config.string_break_width = 1
+    config.string_break_method = C._STRING_BREAK_BY_WIDTH
+    return pp(autoclip_no_room, output, config=config)

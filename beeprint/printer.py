@@ -24,6 +24,7 @@ from . import constants as C
 from .utils import print_exc_plus
 from .models.block import Block, Context
 from .config import Config
+from .debug_kit import print_obj_path
 
 
 def pp(o, output=True, max_depth=None, config=None):
@@ -37,7 +38,11 @@ def pp(o, output=True, max_depth=None, config=None):
     if not output:
         config.stream = None
 
-    res = str(Block(config, Context(obj=o)))
+    try:
+        res = str(Block(config, Context(obj=o)))
+    except:
+        print_obj_path()
+        raise
     if config.debug_level != 0:
         if config.debug_delay:
             print(config.debug_stream.getvalue())

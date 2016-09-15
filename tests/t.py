@@ -27,6 +27,7 @@ else:
     unicode = str
     pyv = 3
 
+from pprintpp import pprint as ppp
 from beeprint import pp, pyv, Config
 from beeprint import constants as C 
 
@@ -107,10 +108,14 @@ def main():
         # df.test_inline_repr_out_of_range()
         config = Config()
         config.max_depth = 3
-        config.debug_level = 9
+        # config.debug_level = 9
+        # pp(sys.modules['inspect'].Parameter.KEYWORD_ONLY, config=config)
+        # pp(sys.modules['re']._cache)
         # pp(sys.modules, config=config)
         # df.test_sort_of_string()
-        df.test_class_last_el()
+        # df.test_class_last_el()
+        # df.test_inner_class()
+        df.test_autoclip_no_room()
 
         return
 

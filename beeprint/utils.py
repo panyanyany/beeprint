@@ -6,6 +6,7 @@ from __future__ import division
 import inspect
 import sys
 import types
+import traceback
 
 
 _unicode = None
@@ -107,3 +108,24 @@ def is_class(o):
 
     return True
 
+def get_name(o):
+    if hasattr(o, '__name__'):
+        return o.__name__
+    if hasattr(o, '__class__'):
+        return o.__class__.__name__
+
+    raise Exception("%s" % type(o))
+
+def has_parent_class(obj, parent_name):
+    if hasattr(obj, '__mro__'):
+        mro = obj.__mro__
+    elif hasattr(obj, '__class__'):
+        mro = obj.__class__.__mro__
+    else:
+        return False
+
+    for cls in mro:
+        cls_name = get_name(cls)
+        if cls_name.endswith(parent_name):
+            return True
+    return False
