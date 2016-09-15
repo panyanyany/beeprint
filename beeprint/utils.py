@@ -129,3 +129,9 @@ def has_parent_class(obj, parent_name):
         if cls_name.endswith(parent_name):
             return True
     return False
+
+
+def has_custom_repr(o):
+    repr_typ_name = lambda o: type(o.__repr__).__name__
+    builtin_repr_names = ['method-wrapper', 'wrapper_descriptor', 'method-wrapper']
+    return hasattr(o, '__repr__') and (repr_typ_name(o) not in builtin_repr_names)

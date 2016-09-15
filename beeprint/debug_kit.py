@@ -79,6 +79,9 @@ def print_obj_path():
         obj = self.ctx.obj
         trace.append((self, obj))
 
+    if len(trace) == 0:
+        return
+
     s_trace = passed_arg_name
     print(s_trace, end='')
     last = trace[0][1]

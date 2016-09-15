@@ -28,10 +28,17 @@ class Config(object):
     stream = sys.stdout
 
     # >> class control
-    # 过滤以 x 开头的属性
+
+    # filter out attributes by prefix
     prop_leading_filters = ["__", "func_"]
-    # 根据类型过滤对象的属性
+    # filter out attributes by name or judgement function
     prop_filters = [utils.is_pan_function, 'im_func', 'im_self', 'im_class']
+
+    # call user-defined __repr__() on class
+    # class_repr_enable = False
+
+    # call user-defined __repr__() on class instance
+    instance_repr_enable = True
 
     # >> 优先策略
     # to raise exception or not when errors happened
@@ -75,3 +82,4 @@ class Config(object):
     # >> dict
     # print dict with ordered keys
     dict_ordered_key_enable = True
+

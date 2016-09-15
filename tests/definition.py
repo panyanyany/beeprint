@@ -211,12 +211,47 @@ def test_sort_of_string(output=True):
     return pp(sort_of_string, output, config=config)
 
 
+# >> ReprMethod
+class ReprMethodClassOldStyle:
+    def __repr__(self):
+        return "<Hey I'm %s>" % self.__class__.__name__
+
 class ReprMethodClassNewStyle(object):
     def __repr__(self):
-        return "<Hey I'm ReprMethodClassNewStyle>"
+        return "<Hey I'm %s>" % self.__class__.__name__
+
+# >> ReprStatic
+class ReprStaticClassOldStyle:
+    @staticmethod
+    def __repr__():
+        return "<Hey I'm static of ReprStaticClassOldStyle>"
+
+class ReprStaticClassNewStyle(object):
+    @staticmethod
+    def __repr__():
+        return "<Hey I'm static of ReprStaticClassNewStyle>"
+
+# >> ReprClassMethod
+class ReprClassMethodClassOldStyle:
+    @classmethod
+    def __repr__(cls):
+        return "<Hey I'm %s>" % cls.__name__
+
+class ReprClassMethodClassNewStyle(object):
+    @classmethod
+    def __repr__(cls):
+        return "<Hey I'm %s>" % cls.__name__
+
+# >> ReprLambda
+class ReprLambdaClassOldStyle:
+    __repr__ = lambda self: "<Hey I'm %s>" % self.__class__.__name__
+
+class ReprLambdaClassNewStyle:
+    __repr__ = lambda self: "<Hey I'm %s>" % self.__class__.__name__
 
 def test_class_last_el(output=True):
     config = Config()
+    config.instance_repr_enable = False
     rm = ReprMethodClassNewStyle()
     nc = NormalClassNewStyle()
     return pp([rm, nc, rm], output, config=config)
@@ -248,3 +283,31 @@ def test_autoclip_no_room(output=True):
     config.string_break_width = 1
     config.string_break_method = C._STRING_BREAK_BY_WIDTH
     return pp(autoclip_no_room, output, config=config)
+
+
+class_repr = [
+    ReprMethodClassOldStyle,
+    ReprMethodClassNewStyle,
+    ReprStaticClassOldStyle,
+    ReprStaticClassNewStyle,
+    ReprClassMethodClassOldStyle,
+    ReprClassMethodClassNewStyle,
+    ReprLambdaClassOldStyle,
+    ReprLambdaClassNewStyle,
+    EmptyFunc,
+    EmptyClassOldStyle,
+    EmptyClassNewStyle,
+    NormalClassOldStyle,
+    NormalClassNewStyle,
+]
+def test_class_all_repr_disable(output=True):
+    config = Config()
+    config.instance_repr_enable = False
+    return pp(class_repr, output, config=config)
+
+def test_class_inst_repr_enable(output=True):
+    config = Config()
+    inst_repr = []
+    for c in class_repr:
+        inst_repr.append(c())
+    return pp(class_repr + inst_repr, output, config=config)

@@ -1,0 +1,21 @@
+[
+  class(ReprMethodClassOldStyle),
+  class(ReprMethodClassNewStyle),
+  class(ReprStaticClassOldStyle),
+  class(ReprStaticClassNewStyle),
+  class(ReprClassMethodClassOldStyle),
+  class(ReprClassMethodClassNewStyle),
+  class(ReprLambdaClassOldStyle),
+  class(ReprLambdaClassNewStyle),
+  function(EmptyFunc),
+  class(EmptyClassOldStyle),
+  class(EmptyClassNewStyle),
+  class(NormalClassOldStyle):
+    static_props: 1
+  class(NormalClassNewStyle):
+    dicts: {
+    },
+    lists: [],
+    static_props: 1,
+    tupl: (1, 2)
+]

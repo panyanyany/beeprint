@@ -224,5 +224,25 @@ class TestClass(TestBase):
 
         self.assertEqual(ans, res)
 
+    def test_class_all_repr_disable(self):
+        rel_path = 'data/class/all_repr_disable.txt'
+        data_path = os.path.join(CUR_SCRIPT_PATH, rel_path)
+        with codecs.open(data_path, encoding='utf8') as fp:
+            ans = fp.read()
+
+        res = df.test_class_all_repr_disable(False)
+
+        self.assertEqual(ans, res)
+
+    def test_class_inst_repr_enable(self):
+        rel_path = 'data/class/inst_repr_enable.txt'
+        data_path = os.path.join(CUR_SCRIPT_PATH, rel_path)
+        with codecs.open(data_path, encoding='utf8') as fp:
+            ans = fp.read()
+
+        res = df.test_class_inst_repr_enable(False)
+
+        self.assertEqual(ans, res)
+
 if __name__ == '__main__':
     unittest.main()

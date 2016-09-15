@@ -12,7 +12,8 @@ from beeprint import helper
 from beeprint import constants as C
 from beeprint.config import Config
 from beeprint.debug_kit import debug
-from beeprint.utils import is_newline_obj, is_class_instance, pyv, _unicode, get_name
+from beeprint.utils import (is_newline_obj, is_class_instance, pyv, 
+                            _unicode, get_name, has_custom_repr)
 from beeprint.helper import (object_attr_default_filter, dict_key_filter, _b, 
                              ustr, is_extendable)
 from beeprint.lib import search_up_tree as sut
@@ -201,49 +202,55 @@ class ClassBlock(Block):
         elif position & C._AS_VALUE_:
             _leading += ustr('')
 
+        name = get_name(o)
+        label = ''
+
         if is_class_instance(o):
-            ret = _leading + ustr('instance(%s):' % o.__class__.__name__) + '\n'
+            label = 'instance'
         elif inspect.isfunction(o):
-            ret = _leading + ustr('function(%s):' % o.__name__) + '\n'
+            label = 'function'
         elif inspect.isbuiltin(o):
-            ret = _leading + ustr('builtin(%s):' % o.__name__) + '\n'
+            label = 'builtin'
         elif inspect.ismethod(o):
-            ret = _leading + ustr('method(%s):' % o.__name__) + '\n'
+            label = 'method'
         else:
             '本身就是类，不是对象'
-            try:
-                ret = _leading + 'class(%s):' % get_name(o) + '\n'
-            except:
-                print(inspect.isclass(o))
-                print(o, dir(o))
-                raise
+            label = 'class'
 
-        # body
-        ele_ctnr = self.get_elements()
-        props_cnt = len(ele_ctnr)
+        ret = _leading + '%s(%s):' % (label, name)
+        if (self.config.instance_repr_enable and 
+                is_class_instance(self.ctx.obj) and
+                has_custom_repr(self.ctx.obj)):
+            ret = _b(self.config, ret + ' ' + ustr(self.ctx.obj.__repr__()))
+        else:
+            ret += '\n'
 
-        if props_cnt == 0:
-            # right strip ':\n'
-            ret = ret[:-2]
+            # body
+            ele_ctnr = self.get_elements()
+            props_cnt = len(ele_ctnr)
 
-        ret = _b(self.config, ret)
+            if props_cnt == 0:
+                # right strip ':\n'
+                ret = ret[:-2]
 
-        for idx, key, val in ele_ctnr:
-            '''
-            '最后一个元素不需要再加(,)逗号'
-            if idx == props_cnt - 1:
-                position = C._AS_VALUE_
-            else:
-                position = C._AS_CLASS_ELEMENT_
-            '''
+            ret = _b(self.config, ret)
 
-            # '忽略掉 以__开头的成员、自引用成员、函数成员'
-            ctx = self.ctx.clone()
-            ctx.obj = (key, val)
-            ctx.parent = self
-            ctx.position = C._AS_CLASS_ELEMENT_
-            ctx.indent_cnt = self.ctx.indent_cnt + 1
-            ret += str(PairBlock(self.config, ctx))
+            for idx, key, val in ele_ctnr:
+                '''
+                '最后一个元素不需要再加(,)逗号'
+                if idx == props_cnt - 1:
+                    position = C._AS_VALUE_
+                else:
+                    position = C._AS_CLASS_ELEMENT_
+                '''
+
+                # '忽略掉 以__开头的成员、自引用成员、函数成员'
+                ctx = self.ctx.clone()
+                ctx.obj = (key, val)
+                ctx.parent = self
+                ctx.position = C._AS_CLASS_ELEMENT_
+                ctx.indent_cnt = self.ctx.indent_cnt + 1
+                ret += str(PairBlock(self.config, ctx))
 
         # }
         ret += _b(self.config, tail + block_ending)
