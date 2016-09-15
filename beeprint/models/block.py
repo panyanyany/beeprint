@@ -221,7 +221,7 @@ class ClassBlock(Block):
         if (self.config.instance_repr_enable and 
                 is_class_instance(self.ctx.obj) and
                 has_custom_repr(self.ctx.obj)):
-            ret = _b(self.config, ret + ' ' + ustr(self.ctx.obj.__repr__()))
+            ret = _b(self.config, ret + ' ' + ustr(repr(self.ctx.obj)))
         else:
             ret += '\n'
 
