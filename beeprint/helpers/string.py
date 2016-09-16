@@ -17,6 +17,8 @@ def calc_width(s):
 
 
 def cut_string(s, length):
+    assert length > 0, "length must be positive"
+
     t = urwid.Text(s)
     seg_list = t.render((length,)).text
     a_str = seg_list[0].rstrip().decode('utf8')
@@ -84,10 +86,17 @@ def shrink_string(s, width):
     s_width = calc_width(s)
     if s_width > width:
         info = u'...(len=%d)' % (s_width)
-        s = cut_string(s, width - calc_width(tail))
+        length = width - calc_width(info)
+        if length > 0:
+            s = cut_string(s, length)
+        elif length == 0:
+            s = ''
+        else:
+            return (s, -1*length)
+
         s += info
 
-    return s
+    return (s, 0)
 
 
 def shrink_inner_string(ctx, method, width=None, wrapper=None):
@@ -98,11 +107,12 @@ def shrink_inner_string(ctx, method, width=None, wrapper=None):
     # calculate availiable width for string
     a_width = get_line_width(method, width) - left_margin - right_margin
 
-    s_width = calc_width(s)
-    if s_width > a_width:
-        info = u'...(len=%d)' % (s_width)
-        s = cut_string(s, a_width - calc_width(info))
-        s += info
+    if a_width <= 0:
+        a_width = 1 # 1 just a random value to make it positive
+
+    s, lack = shrink_string(s, a_width)
+    if lack:
+        s, lack = shrink_string(s, a_width + lack)
 
     ctx.obj = s
     return s

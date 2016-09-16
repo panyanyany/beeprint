@@ -8,6 +8,8 @@ import traceback
 import types
 import inspect
 
+from io import StringIO
+
 from .utils import pyv
 
 if pyv == 2:
@@ -22,6 +24,7 @@ from . import constants as C
 from .utils import print_exc_plus
 from .models.block import Block, Context
 from .config import Config
+from .debug_kit import print_obj_path
 
 
 def pp(o, output=True, max_depth=None, config=None):
@@ -32,19 +35,17 @@ def pp(o, output=True, max_depth=None, config=None):
     if max_depth:
         config.max_depth = max_depth
 
-    res = str(Block(config, Context(obj=o)))
-    if output and not config.write_to_buffer_when_execute:
-        try:
-            print(res, end='')
-            # return res
-        except Exception as e:
-            print_exc_plus()
-            if type(e) is UnicodeEncodeError:
-                # UnicodeEncodeError: 'ascii' codec can't encode characters in
-                # position 35-36: ordinal not in range(128)
-                print(sys.getdefaultencoding())
-                print('res value type:', type(res))
-            else:
-                print('exception type :', type(e))
-    else:
+    if not output:
+        config.stream = None
+
+    try:
+        res = str(Block(config, Context(obj=o)))
+    except:
+        print_obj_path()
+        raise
+    if config.debug_level != 0:
+        if config.debug_delay:
+            print(config.debug_stream.getvalue())
+
+    if not output:
         return res

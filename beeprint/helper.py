@@ -88,8 +88,8 @@ def object_attr_default_filter(config, obj, name, val):
 def dict_key_filter(obj, name, val):
     return False
 
-def _b(s, config=Config()):
-    if config.write_to_buffer_when_execute:
-        config.buffer_handler.write(s)
-        config.buffer_handler.flush()
+def _b(config, s):
+    if config and config.stream:
+        config.stream.write(s)
+        config.stream.flush()
     return s

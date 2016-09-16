@@ -1,0 +1,11 @@
+[
+  [
+    '...(len=80)',
+    {},
+  ],
+  {
+    'akey': '...(len=15)',
+  },
+  class(ForNoRoom):
+    xxxxxxxxxxxxxxxxxxx: '...(len=23)'
+]

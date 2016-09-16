@@ -1,0 +1,11 @@
+[
+  instance(ReprMethodClassNewStyle),
+  instance(NormalClassNewStyle):
+    dicts: {
+    },
+    lists: [],
+    say_hi: 'hello world',
+    static_props: 1,
+    tupl: (1, 2)
+  instance(ReprMethodClassNewStyle),
+]

@@ -10,14 +10,13 @@ Features
 -  **text:** auto break into lines, auto clip long text
 -  **multi language:** supports English, Chinese
 -  outstanding mark to class and instance
+-  supports representing by user-defined __repr__ of class instance
 -  compatible with py2 py3
 
 Contents
 ========
 
--  `Examples <#examples>`__
--  `Installation <#installation>`__
--  `Settings <#settings>`__
+.. contents:: 
 
 Examples
 ========
@@ -28,7 +27,6 @@ A Real World Example
 .. figure:: https://github.com/panyanyany/beeprint/raw/master/docs/images/a_real_world_example.png
    :alt: A Real World Example
 
-   A Real World Example
 
 Import beeprint as pp
 ---------------------

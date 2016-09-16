@@ -10,6 +10,7 @@ import sys
 import types
 import inspect
 import codecs
+import re
 
 
 CUR_SCRIPT_PATH = os.path.dirname(os.path.abspath(__file__))
@@ -27,6 +28,7 @@ else:
     unicode = str
     pyv = 3
 
+from pprintpp import pprint as ppp
 from beeprint import pp, pyv, Config
 from beeprint import constants as C 
 
@@ -92,6 +94,59 @@ args = {
     "builtin_test": builtin_test,
 }
 
+def has_custom_repr(o):
+    repr_typ_name = lambda o: type(o.__repr__).__name__
+    builtin_repr_names = ['method-wrapper', 'wrapper_descriptor', 'method-wrapper']
+    return hasattr(o, '__repr__') and repr_typ_name(o) not in builtin_repr_names
+
+
+def get_decorators(o):
+    sourcelines = inspect.getsourcelines(o)[0]
+    decorators = []
+    for line in sourcelines:
+        line = line.strip()
+        if line.startswith('@'):
+            match = re.search('@(.*)[\(]*', line)
+            if not match:
+                print('unmatch line', line)
+                continue
+            decorators.append(match.group(1))
+
+    return decorators
+
+
+def test_class_repr():
+    reprs = [
+        df.ReprMethodClassOldStyle,
+        df.ReprMethodClassNewStyle,
+        df.ReprStaticClassOldStyle,
+        df.ReprStaticClassNewStyle,
+        df.ReprClassMethodClassOldStyle,
+        df.ReprClassMethodClassNewStyle,
+        df.ReprLambdaClassOldStyle,
+        df.ReprLambdaClassNewStyle,
+    ]
+    values = [
+        df.EmptyFunc,
+        df.EmptyClassOldStyle,
+        df.EmptyClassNewStyle,
+        df.NormalClassOldStyle,
+        df.NormalClassNewStyle,
+        df.inst_of_normal_class_old_style,
+        df.inst_of_normal_class_new_style,
+        df.ReprMethodClassNewStyle,
+    ]
+    typ = lambda e: type(e.__repr__).__name__
+    for c in values+reprs:
+        print('%60s %s' % (c, has_custom_repr(c)))
+
+    print()
+    for c in reprs:
+        # print('%60s %20s %20s' % (c, typ(c), typ(c())))
+        print('%60s %s:%20s %s:%20s' % (c, get_decorators(c.__repr__), typ(c), get_decorators(c().__repr__), typ(c())))
+        # print('%60s %20s %-20s' % (c, typ(c), repr(c())))
+
+
 def main():
     if len(sys.argv) == 1:
         # S.debug_level = 9
@@ -105,10 +160,18 @@ def main():
         # df.test_boundary_break()
         # df.test_complicate_data()
         # df.test_inline_repr_out_of_range()
-        df.test_class()
         config = Config()
-        config.debug_level = 0
-        pp([df.EmptyClassNewStyle, (1,), df.NormalClassNewStyle], config=config)
+        config.max_depth = 3
+        # config.debug_level = 9
+        # pp(sys.modules['inspect'].Parameter.KEYWORD_ONLY, config=config)
+        # pp(sys.modules['re']._cache)
+        # pp(sys.modules, config=config)
+        # df.test_sort_of_string()
+        # df.test_class_last_el()
+        # df.test_inner_class()
+        # df.test_autoclip_no_room()
+        # df.test_class_all_repr_disable()
+        df.test_class_inst_repr_enable()
 
         return
 

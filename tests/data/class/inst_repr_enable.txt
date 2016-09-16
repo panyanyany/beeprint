@@ -1,0 +1,41 @@
+[
+  class(ReprMethodClassOldStyle),
+  class(ReprMethodClassNewStyle),
+  class(ReprStaticClassOldStyle),
+  class(ReprStaticClassNewStyle),
+  class(ReprClassMethodClassOldStyle),
+  class(ReprClassMethodClassNewStyle),
+  class(ReprLambdaClassOldStyle),
+  class(ReprLambdaClassNewStyle),
+  function(EmptyFunc),
+  class(EmptyClassOldStyle),
+  class(EmptyClassNewStyle),
+  class(NormalClassOldStyle):
+    static_props: 1
+  class(NormalClassNewStyle):
+    dicts: {
+    },
+    lists: [],
+    static_props: 1,
+    tupl: (1, 2)
+  instance(ReprMethodClassOldStyle): <Hey I'm ReprMethodClassOldStyle>,
+  instance(ReprMethodClassNewStyle): <Hey I'm ReprMethodClassNewStyle>,
+  instance(ReprStaticClassOldStyle): <Hey I'm static of ReprStaticClassOldStyle>,
+  instance(ReprStaticClassNewStyle): <Hey I'm static of ReprStaticClassNewStyle>,
+  instance(ReprClassMethodClassOldStyle): <Hey I'm ReprClassMethodClassOldStyle>,
+  instance(ReprClassMethodClassNewStyle): <Hey I'm ReprClassMethodClassNewStyle>,
+  instance(ReprLambdaClassOldStyle): <Hey I'm ReprLambdaClassOldStyle>,
+  instance(ReprLambdaClassNewStyle): <Hey I'm ReprLambdaClassNewStyle>,
+  None,
+  instance(EmptyClassOldStyle),
+  instance(EmptyClassNewStyle),
+  instance(NormalClassOldStyle):
+    static_props: 1
+  instance(NormalClassNewStyle):
+    dicts: {
+    },
+    lists: [],
+    say_hi: 'hello world',
+    static_props: 1,
+    tupl: (1, 2)
+]
