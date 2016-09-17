@@ -224,13 +224,13 @@ class ClassBlock(Block):
         name = get_name(o)
         label = get_type(o)
 
-        ret = _leading + '%s(%s):' % (label, name)
+        ret = _leading
         if (self.config.instance_repr_enable and 
                 is_class_instance(self.ctx.obj) and
                 has_custom_repr(self.ctx.obj)):
-            ret = _b(self.config, ret + ' ' + ustr(repr(self.ctx.obj)))
+            ret = _b(self.config, ret + ustr(repr(self.ctx.obj)))
         else:
-            ret += '\n'
+            ret += '%s(%s):' % (label, name) + '\n'
 
             # body
             ele_ctnr = self.get_elements()
@@ -351,9 +351,14 @@ class ListBlock(Block):
             if all(_f):
                 _o = map(lambda e: repr_block(e), o)
                 if self.config.newline or position & C._AS_ELEMENT_:
-                    ret += ustr(self.config.indent_char * indent_cnt)
-                ret += ustr("[") + ', '.join(_o) + ustr("]" + tail + block_ending)
-                return _b(self.config, ret)
+                    ret += _b(self.config, self.config.indent_char * indent_cnt)
+                ret += _b(self.config, "[")
+                for (i, e) in enumerate(_o):
+                    if i:
+                        ret += _b(self.config, ', ')
+                    ret += _b(self.config, e)
+                ret +=  _b(self.config, "]" + tail + block_ending)
+                return ret
 
         # [
         if self.config.newline or position & C._AS_ELEMENT_:
@@ -407,7 +412,12 @@ class TupleBlock(Block):
                 _o = map(lambda e: repr_block(e), o)
                 if self.config.newline or position & C._AS_ELEMENT_:
                     ret += _b(self.config, self.config.indent_char * indent_cnt)
-                ret += _b(self.config, ustr("(") + ', '.join(_o) + ')' + tail + block_ending)
+                ret += _b(self.config, ustr("("))
+                for (i, e) in enumerate(_o):
+                    if i:
+                        ret += _b(self.config, ', ')
+                    ret += _b(self.config, e)
+                ret += _b(self.config, ')' + tail + block_ending)
                 return ret
 
         # (

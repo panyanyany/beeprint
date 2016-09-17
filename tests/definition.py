@@ -3,6 +3,7 @@ from __future__ import print_function
 from beeprint import constants as C 
 from beeprint import pp
 from beeprint import Config
+from beeprint.helper import ustr
 # from pprintpp import pprint as ppp
 
 def EmptyFunc(): pass
@@ -222,6 +223,7 @@ sort_of_string = [
 
 def test_sort_of_string(output=True):
     config = Config()
+    config.debug_delay = False
     for sstr in sort_of_string:
         ints = ''
         for e in sstr:
@@ -229,8 +231,8 @@ def test_sort_of_string(output=True):
                 ints += '%d ' % ord(e)
             except:
                 ints += '%d ' % e
-        print('%40s %s' % (ints, repr(sstr)))
-    # return pp(sort_of_string, output, config=config)
+        print('%40s %s %s' % (ints, repr(sstr), ustr(sstr)))
+    return pp(sort_of_string, output, config=config)
 
 
 # >> ReprMethod
