@@ -10,7 +10,8 @@ Features
 -  **text:** auto break into lines, auto clip long text
 -  **multi language:** supports English, Chinese
 -  outstanding mark to class and instance
--  supports representing by user-defined __repr__ of class instance
+-  supports user-defined `__repr__`
+-  **recursion** aware
 -  compatible with py2 py3
 
 Contents

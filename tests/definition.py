@@ -196,6 +196,10 @@ def test_tuple(output=True):
     config = Config()
     return pp(tuple_testing, output, config=config)
 
+tuple_nested = (1, (2,))
+def test_tuple_nested(output=True):
+    config = Config()
+    return pp(tuple_nested, output, config=config)
 
 def test_class(output=True):
     config = Config()
@@ -341,30 +345,25 @@ class RecurTestRecurClass(object):
     k1 = 1
 RecurTestRecurClass.k2 = RecurTestRecurClass
 
-def test_recursive(output=True):
+def test_recursion(output=True):
     d = {}
     d['d'] = d
 
-    d2 = {'1':1, '2':2}
+    d2 = {'1':1}
     d2['r'] = {'d2':d2}
 
     l = []
     l.append(l)
 
-    t = (1,)
-    t += (t, )
-
     recursive_values = [
         l,
-        t,
-    ]
-    a = [
+        l, # this one should not be treat as recursion
         d,
         d2,
         inst_of_recur_normal,
         RecurTestRecurClass,
     ]
     config = Config()
-    config.debug_level = 9
+    # config.debug_level = 9
     return pp(recursive_values, output, config=config)
     # return ppp(recursive_values)

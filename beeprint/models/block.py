@@ -26,8 +26,6 @@ from beeprint.helpers.string import (break_string,
 from beeprint.models.wrapper import StringWrapper
 
 
-obj_ids = {}
-
 class Block(object):
     ctx = None
 
@@ -98,14 +96,13 @@ class Block(object):
         ret = ustr('')
 
         tail = self.ctx.element_ending
-        block_ending = u''
+        block_ending = self.get_block_ending()
         debug(self.config, C._DL_STATEMENT, 
               indent_cnt, 'tail, block_ending: ' + str([tail, block_ending]))
 
         # recursive check
-        """
         oid = id(obj)
-        if oid in obj_ids:
+        if oid in self.ctx.obj_ids:
             if self.config.newline or position & C._AS_ELEMENT_:
                 ret = ustr(indent_cnt * self.config.indent_char)
             else:
@@ -118,8 +115,8 @@ class Block(object):
             ret += ustr("<Recursion on %s with id=%d>" % (typename, oid))
             ret += tail + block_ending
             return _b(self.config, ret)
-        obj_ids[oid] = True
-        """
+        self.ctx.obj_ids = self.ctx.obj_ids.copy()
+        self.ctx.obj_ids.add(oid)
 
         if self.config.max_depth <= indent_cnt:
             if self.config.newline or position & C._AS_ELEMENT_:
@@ -409,7 +406,7 @@ class TupleBlock(Block):
             if all(_f):
                 _o = map(lambda e: repr_block(e), o)
                 if self.config.newline or position & C._AS_ELEMENT_:
-                    ret += ustr(self.config.indent_char * indent_cnt)
+                    ret += _b(self.config, self.config.indent_char * indent_cnt)
                 ret += _b(self.config, ustr("(") + ', '.join(_o) + ')' + tail + block_ending)
                 return ret
 
@@ -544,6 +541,8 @@ class Context(object):
         self.element_ending = None
         self.key = None
         self.key_expr = ''
+
+        self.obj_ids = set()
 
         self.__dict__.update(**attrs)
 

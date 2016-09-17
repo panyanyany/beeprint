@@ -28,6 +28,12 @@ class TestBase(unittest.TestCase):
     def setUp(self):
         pass
 
+    def load(self, rel_path):
+        data_path = os.path.join(CUR_SCRIPT_PATH, rel_path)
+        with codecs.open(data_path, encoding='utf8') as fp:
+            ans = fp.read()
+        return ans
+
 
 class TestSimpleTypes(TestBase):
 
@@ -136,6 +142,14 @@ class TestSimpleTypes(TestBase):
         # res = pp(long_text_en, output=False, config=config)
         # self.assertEqual(res, ans)
 
+    def test_recursion(self):
+        ans = self.load('data/recursion.txt')
+        res = df.test_recursion(output=False)
+
+        res, _ = re.subn("id=\d+>", "", res)
+        ans, _ = re.subn("id=\d+>", "", ans)
+        self.assertEqual(res, ans)
+
 
 class TestLineBreak(TestBase):
     
@@ -195,6 +209,13 @@ class TestTuple(TestBase):
             ans = fp.read()
 
         res = df.test_tuple(False)
+
+        self.assertEqual(ans, res)
+
+    def test_nested(self):
+        ans = self.load('data/tuple/nested.txt')
+
+        res = df.test_tuple_nested(False)
 
         self.assertEqual(ans, res)
 
