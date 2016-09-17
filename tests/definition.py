@@ -1,7 +1,9 @@
 # -*- coding:utf-8 -*-
+from __future__ import print_function
 from beeprint import constants as C 
 from beeprint import pp
 from beeprint import Config
+# from pprintpp import pprint as ppp
 
 def EmptyFunc(): pass
 
@@ -202,13 +204,29 @@ def test_class(output=True):
 sort_of_string = [
     'normal',
     u'unicode',
-    b'\xff\xfe',
+    '中文',
+    # b'中文',
+    u'中文',
     '\xff\xfe',
+    b'\xff\xfe',
+    u'\xff\xfe',
+    '\ud800', # different in py2 and py3
+    b'\ud800',
+    u'\ud800',
+    # u'\ud800-\udbff\\\udc00\udc01-\udfff',
 ]
 
 def test_sort_of_string(output=True):
     config = Config()
-    return pp(sort_of_string, output, config=config)
+    for sstr in sort_of_string:
+        ints = ''
+        for e in sstr:
+            try:
+                ints += '%d ' % ord(e)
+            except:
+                ints += '%d ' % e
+        print('%40s %s' % (ints, repr(sstr)))
+    # return pp(sort_of_string, output, config=config)
 
 
 # >> ReprMethod
@@ -311,3 +329,42 @@ def test_class_inst_repr_enable(output=True):
     for c in class_repr:
         inst_repr.append(c())
     return pp(class_repr + inst_repr, output, config=config)
+
+
+class RecurTestNormalClass(object):
+    k1 = 1
+
+inst_of_recur_normal = RecurTestNormalClass()
+inst_of_recur_normal.k2 = inst_of_recur_normal
+
+class RecurTestRecurClass(object):
+    k1 = 1
+RecurTestRecurClass.k2 = RecurTestRecurClass
+
+def test_recursive(output=True):
+    d = {}
+    d['d'] = d
+
+    d2 = {'1':1, '2':2}
+    d2['r'] = {'d2':d2}
+
+    l = []
+    l.append(l)
+
+    t = (1,)
+    t += (t, )
+
+    recursive_values = [
+        l,
+        t,
+    ]
+    a = [
+        d,
+        d2,
+        inst_of_recur_normal,
+        RecurTestRecurClass,
+    ]
+    config = Config()
+    config.debug_level = 9
+    return pp(recursive_values, output, config=config)
+    # return ppp(recursive_values)

@@ -13,7 +13,8 @@ from beeprint import constants as C
 from beeprint.config import Config
 from beeprint.debug_kit import debug
 from beeprint.utils import (is_newline_obj, is_class_instance, pyv, 
-                            _unicode, get_name, has_custom_repr)
+                            _unicode, get_name, get_type, has_custom_repr,
+                            is_base_type)
 from beeprint.helper import (object_attr_default_filter, dict_key_filter, _b, 
                              ustr, is_extendable)
 from beeprint.lib import search_up_tree as sut
@@ -24,6 +25,8 @@ from beeprint.helpers.string import (break_string,
                                      get_line_width)
 from beeprint.models.wrapper import StringWrapper
 
+
+obj_ids = {}
 
 class Block(object):
     ctx = None
@@ -98,6 +101,25 @@ class Block(object):
         block_ending = u''
         debug(self.config, C._DL_STATEMENT, 
               indent_cnt, 'tail, block_ending: ' + str([tail, block_ending]))
+
+        # recursive check
+        """
+        oid = id(obj)
+        if oid in obj_ids:
+            if self.config.newline or position & C._AS_ELEMENT_:
+                ret = ustr(indent_cnt * self.config.indent_char)
+            else:
+                ret = ustr("")
+
+            if is_base_type(obj):
+                typename = '%s' % get_name(obj)
+            else:
+                typename = '%s(%s)' % (get_type(obj), get_name(obj))
+            ret += ustr("<Recursion on %s with id=%d>" % (typename, oid))
+            ret += tail + block_ending
+            return _b(self.config, ret)
+        obj_ids[oid] = True
+        """
 
         if self.config.max_depth <= indent_cnt:
             if self.config.newline or position & C._AS_ELEMENT_:
@@ -203,19 +225,7 @@ class ClassBlock(Block):
             _leading += ustr('')
 
         name = get_name(o)
-        label = ''
-
-        if is_class_instance(o):
-            label = 'instance'
-        elif inspect.isfunction(o):
-            label = 'function'
-        elif inspect.isbuiltin(o):
-            label = 'builtin'
-        elif inspect.ismethod(o):
-            label = 'method'
-        else:
-            '本身就是类，不是对象'
-            label = 'class'
+        label = get_type(o)
 
         ret = _leading + '%s(%s):' % (label, name)
         if (self.config.instance_repr_enable and 
