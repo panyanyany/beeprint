@@ -8,8 +8,6 @@ import inspect
 import sys
 import re
 
-from pprintpp import pprint as pp
-
 from . import constants as C
 from .utils import print_exc_plus, get_name, has_parent_class
 

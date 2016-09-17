@@ -135,3 +135,23 @@ def has_custom_repr(o):
     repr_typ_name = lambda o: type(o.__repr__).__name__
     builtin_repr_names = ['method-wrapper', 'wrapper_descriptor', 'method-wrapper']
     return hasattr(o, '__repr__') and (repr_typ_name(o) not in builtin_repr_names)
+
+
+def get_type(o):
+    if is_class_instance(o):
+        label = 'instance'
+    elif inspect.isfunction(o):
+        label = 'function'
+    elif inspect.isbuiltin(o):
+        label = 'builtin'
+    elif inspect.ismethod(o):
+        label = 'method'
+    else:
+        '本身就是类，不是对象'
+        label = 'class'
+
+    return label
+
+
+def is_base_type(o):
+    return isinstance(o, (list, tuple, dict, int, float, str, _unicode))

@@ -171,7 +171,17 @@ def main():
         # df.test_inner_class()
         # df.test_autoclip_no_room()
         # df.test_class_all_repr_disable()
-        df.test_class_inst_repr_enable()
+        # df.test_class_inst_repr_enable()
+
+        # import pygments.unistring
+        # pp(sys.modules['pygments.unistring'].Cs)
+        # ppp(sys.modules['pygments.unistring'].Cs)
+        # print(sys.modules['pygments.unistring'].Cs)
+
+        # df.test_sort_of_string()
+        # ppp(df.sort_of_string)
+        df.test_recursive()
+
 
         return
 
