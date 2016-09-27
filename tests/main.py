@@ -50,30 +50,42 @@ class TestSimpleTypes(TestBase):
         config = Config()
         config.str_display_not_prefix_u = False
         config.str_display_not_prefix_b = False
-        if pyv == 2:
-            self.assertEqual(pp("plain string", output=False, config=config), "b'plain string'\n")
-        elif pyv == 3:
-            self.assertEqual(pp("plain string", output=False, config=config), "u'plain string'\n")
+        self.assertEqual(pp("plain string", output=False, config=config), "'plain string'\n")
 
         # unicode string
         s = u'unicode string'
-        self.assertEqual(pp(s, output=False, config=config), u"u'unicode string'\n")
+        if pyv == 2:
+            self.assertEqual(pp(s, output=False, config=config), u"u'unicode string'\n")
+        else:
+            self.assertEqual(pp(s, output=False, config=config), u"'unicode string'\n")
 
         # utf8 string
         s = u'utf8 string'.encode('utf-8')
-        self.assertEqual(pp(s, output=False, config=config), u"b'utf8 string'\n")
+        if pyv == 2:
+            self.assertEqual(pp(s, output=False, config=config), u"'utf8 string'\n")
+        else:
+            self.assertEqual(pp(s, output=False, config=config), u"b'utf8 string'\n")
 
         # gb2312 string
         s = u'gb2312 string'.encode('gb2312')
-        self.assertEqual(pp(s, output=False, config=config), u"b'gb2312 string'\n")
+        if pyv == 2:
+            self.assertEqual(pp(s, output=False, config=config), u"'gb2312 string'\n")
+        else:
+            self.assertEqual(pp(s, output=False, config=config), u"b'gb2312 string'\n")
 
         # unicode special characters string
         s = u'\\'
-        self.assertEqual(pp(s, output=False, config=config), u"u'\\\\'\n")
+        if pyv == 2:
+            self.assertEqual(pp(s, output=False, config=config), u"u'\\\\'\n")
+        else:
+            self.assertEqual(pp(s, output=False, config=config), u"'\\\\'\n")
 
         # utf8 special characters string
         s = u'\\'.encode("utf8")
-        self.assertEqual(pp(s, output=False, config=config), u"b'\\\\'\n")
+        if pyv == 2:
+            self.assertEqual(pp(s, output=False, config=config), u"'\\\\'\n")
+        else:
+            self.assertEqual(pp(s, output=False, config=config), u"b'\\\\'\n")
 
     def test_complicate_data(self):
         config = Config()

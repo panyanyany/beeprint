@@ -4,7 +4,7 @@ from beeprint import constants as C
 from beeprint import pp
 from beeprint import Config
 from beeprint.helper import ustr
-# from pprintpp import pprint as ppp
+from pprintpp import pprint as ppp
 
 def EmptyFunc(): pass
 
@@ -207,14 +207,28 @@ def test_class(output=True):
     return pp(EmptyClassNewStyle, output, config=config)
 
 sort_of_string = [
+    '\\',
+    u'\\',
+    b'\\',
+    u'\\'.encode('utf8'),
+]
+sort_of_string += [
     'normal',
     u'unicode',
+]
+sort_of_string += [
     '中文',
     # b'中文',
     u'中文',
+    u'中文'.encode('utf8'),
+]
+sort_of_string += [
     '\xff\xfe',
     b'\xff\xfe',
     u'\xff\xfe',
+    u'\xff\xfe'.encode('utf8'),
+]
+sort_of_string += [
     '\ud800', # different in py2 and py3
     b'\ud800',
     u'\ud800',
@@ -224,6 +238,8 @@ sort_of_string = [
 def test_sort_of_string(output=True):
     config = Config()
     config.debug_delay = False
+    config.str_display_not_prefix_u = False
+    config.str_display_not_prefix_b = False
     for sstr in sort_of_string:
         ints = ''
         for e in sstr:
@@ -231,8 +247,9 @@ def test_sort_of_string(output=True):
                 ints += '%d ' % ord(e)
             except:
                 ints += '%d ' % e
-        print('%40s %s %s' % (ints, repr(sstr), ustr(sstr)))
+        print('%40s %s %s' % (ints, repr(sstr), len(sstr)))
     return pp(sort_of_string, output, config=config)
+    # return ppp(sort_of_string)
 
 
 # >> ReprMethod
