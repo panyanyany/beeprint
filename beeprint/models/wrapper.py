@@ -5,6 +5,7 @@ from __future__ import unicode_literals
 from __future__ import division
 
 from beeprint import constants as C
+from ..utils import pyv
 
 
 class Wrapper(object):
@@ -40,13 +41,19 @@ class StringWrapper(Wrapper):
                 if self.config.str_display_not_prefix_u:
                     pass
                 else:
-                    self.etm = u'u'
+                    if pyv == 2:
+                        self.etm = u'u'
+                    else:
+                        pass
             elif typ.is_all(typ._BYTES_):
                 # in py3, printed string will enclose with b''
                 if self.config.str_display_not_prefix_b:
                     pass
                 else:
-                    self.etm = u'b'
+                    if pyv == 2:
+                        pass
+                    else:
+                        self.etm = u'b'
 
     def wrap(self, obj):
         return ''.join([

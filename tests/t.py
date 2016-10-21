@@ -166,7 +166,6 @@ def main():
         # pp(sys.modules['inspect'].Parameter.KEYWORD_ONLY, config=config)
         # pp(sys.modules['re']._cache)
         # pp(sys.modules, config=config)
-        # df.test_sort_of_string()
         # df.test_class_last_el()
         # df.test_inner_class()
         # df.test_autoclip_no_room()
@@ -178,10 +177,10 @@ def main():
         # ppp(sys.modules['pygments.unistring'].Cs)
         # print(sys.modules['pygments.unistring'].Cs)
 
-        # df.test_sort_of_string()
+        df.test_sort_of_string()
         # ppp(df.sort_of_string)
-        df.test_recursive()
-
+        # df.test_recursion()
+        # df.test_tuple_nested()
 
         return
 

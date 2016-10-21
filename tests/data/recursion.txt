@@ -1,0 +1,23 @@
+[
+  [
+    <Recursion on list with id=140382028315848>,
+  ],
+  [
+    <Recursion on list with id=140382028315848>,
+  ],
+  {
+    'd': <Recursion on dict with id=140382034363656>,
+  },
+  {
+    '1': 1,
+    'r': {
+      'd2': <Recursion on dict with id=140382038990152>,
+    },
+  },
+  instance(RecurTestNormalClass):
+    k1: 1,
+    k2: <Recursion on instance(RecurTestNormalClass) with id=140382028346368>
+  class(RecurTestRecurClass):
+    k1: 1,
+    k2: <Recursion on class(RecurTestRecurClass) with id=46807496>
+]

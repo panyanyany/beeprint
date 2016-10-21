@@ -23,16 +23,19 @@ def ustr(s, config=Config()):
     '''convert string into unicode'''
     res = u''
 
-    if not isinstance(s, (_unicode, str)):
-        s = str(s)
-
-    if isinstance(s, _unicode):
-        res += s
-    elif isinstance(s, str):
-        # in python 2/3, it's utf8
-        # so decode to unicode
-        res += s.decode(config.encoding)
-
+    try:
+        if pyv == 2:
+            if isinstance(s, _unicode):
+                res = s
+            else: # bytes
+                res = s.decode(config.encoding)
+        else:
+            if isinstance(s, str):
+                res = s
+            else: # bytes
+                res = s.decode(config.encoding)
+    except:
+        res = repr(s).strip("b'")
     return res
 
 def long_string_wrapper(ls, how):

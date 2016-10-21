@@ -4,6 +4,8 @@ from __future__ import absolute_import
 from __future__ import unicode_literals
 from __future__ import division
 
+from io import StringIO
+
 import urwid
 import inspect
 
@@ -22,11 +24,9 @@ from beeprint.lib import position_dict
 from beeprint.helpers.string import (break_string, 
                                      calc_width, calc_left_margin,
                                      too_long, shrink_inner_string,
-                                     get_line_width)
+                                     get_line_width, is_printable)
 from beeprint.models.wrapper import StringWrapper
 
-
-obj_ids = {}
 
 class Block(object):
     ctx = None
@@ -98,14 +98,13 @@ class Block(object):
         ret = ustr('')
 
         tail = self.ctx.element_ending
-        block_ending = u''
+        block_ending = self.get_block_ending()
         debug(self.config, C._DL_STATEMENT, 
               indent_cnt, 'tail, block_ending: ' + str([tail, block_ending]))
 
         # recursive check
-        """
         oid = id(obj)
-        if oid in obj_ids:
+        if oid in self.ctx.obj_ids:
             if self.config.newline or position & C._AS_ELEMENT_:
                 ret = ustr(indent_cnt * self.config.indent_char)
             else:
@@ -118,8 +117,8 @@ class Block(object):
             ret += ustr("<Recursion on %s with id=%d>" % (typename, oid))
             ret += tail + block_ending
             return _b(self.config, ret)
-        obj_ids[oid] = True
-        """
+        self.ctx.obj_ids = self.ctx.obj_ids.copy()
+        self.ctx.obj_ids.add(oid)
 
         if self.config.max_depth <= indent_cnt:
             if self.config.newline or position & C._AS_ELEMENT_:
@@ -227,13 +226,13 @@ class ClassBlock(Block):
         name = get_name(o)
         label = get_type(o)
 
-        ret = _leading + '%s(%s):' % (label, name)
+        ret = _leading
         if (self.config.instance_repr_enable and 
                 is_class_instance(self.ctx.obj) and
                 has_custom_repr(self.ctx.obj)):
-            ret = _b(self.config, ret + ' ' + ustr(repr(self.ctx.obj)))
+            ret = _b(self.config, ret + ustr(repr(self.ctx.obj)))
         else:
-            ret += '\n'
+            ret += '%s(%s):' % (label, name) + '\n'
 
             # body
             ele_ctnr = self.get_elements()
@@ -341,14 +340,19 @@ class ListBlock(Block):
             _f = map(
                 lambda e: (not (is_extendable(e) or 
                                 too_long(self.config.indent_char, 
-                                         indent_cnt, position, repr_block(e)))), 
+                                         indent_cnt, position, repr_block(e, self.config)))), 
                 o)
             if all(_f):
-                _o = map(lambda e: repr_block(e), o)
+                _o = map(lambda e: repr_block(e, self.config), o)
                 if self.config.newline or position & C._AS_ELEMENT_:
-                    ret += ustr(self.config.indent_char * indent_cnt)
-                ret += ustr("[") + ', '.join(_o) + ustr("]" + tail + block_ending)
-                return _b(self.config, ret)
+                    ret += _b(self.config, self.config.indent_char * indent_cnt)
+                ret += _b(self.config, "[")
+                for (i, e) in enumerate(_o):
+                    if i:
+                        ret += _b(self.config, ', ')
+                    ret += _b(self.config, e)
+                ret +=  _b(self.config, "]" + tail + block_ending)
+                return ret
 
         # [
         if self.config.newline or position & C._AS_ELEMENT_:
@@ -399,10 +403,15 @@ class TupleBlock(Block):
         if self.config.tuple_in_line:
             _f = map(lambda e: not is_extendable(e), o)
             if all(_f):
-                _o = map(lambda e: repr_block(e), o)
+                _o = map(lambda e: repr_block(e, self.config), o)
                 if self.config.newline or position & C._AS_ELEMENT_:
-                    ret += ustr(self.config.indent_char * indent_cnt)
-                ret += _b(self.config, ustr("(") + ', '.join(_o) + ')' + tail + block_ending)
+                    ret += _b(self.config, self.config.indent_char * indent_cnt)
+                ret += _b(self.config, ustr("("))
+                for (i, e) in enumerate(_o):
+                    if i:
+                        ret += _b(self.config, ', ')
+                    ret += _b(self.config, e)
+                ret += _b(self.config, ')' + tail + block_ending)
                 return ret
 
         # (
@@ -432,13 +441,12 @@ class PairBlock(Block):
         self.ctx.key = self.ctx.obj[0]
         self.ctx.key_expr = self.get_key(self.ctx.position, self.ctx.key)
 
-    @staticmethod
-    def get_key(position, name):
+    def get_key(self, position, name):
         if position & C._AS_CLASS_ELEMENT_:
             # class method name or attribute name no need to add u or b prefix
             key = ustr(name)
         else:
-            key = repr_block(name)
+            key = repr_block(name, self.config)
 
         return key
 
@@ -537,6 +545,8 @@ class Context(object):
         self.key = None
         self.key_expr = ''
 
+        self.obj_ids = set()
+
         self.__dict__.update(**attrs)
 
     def clone(self):
@@ -558,8 +568,8 @@ class Context(object):
         raise Exception("not yet implement")
 
 
-def repr_block(obj):
-    return str(ReprBlock(Config(), Context(obj=obj)))
+def repr_block(obj, config=Config()):
+    return str(ReprBlock(config, Context(obj=obj)))
 
 
 class ReprBlock(Block):
@@ -653,8 +663,7 @@ class ReprStringHandler(ReprBlock.Handler):
         return typ.is_string()
 
     def escape(self, obj, typ):
-        if pyv == 2 or typ.is_all(typ._UNICODE_):
-            obj = obj.replace(u'\\', u'\\\\')
+        obj = obj.replace(u'\\', u'\\\\')
         obj = obj.replace(u'\n', u'\\n')
         obj = obj.replace(u'\r', u'\\r')
         obj = obj.replace(u'\t', u'\\t')
@@ -664,15 +673,33 @@ class ReprStringHandler(ReprBlock.Handler):
     def __call__(self, ctx, typ):
         if typ.is_all(typ._BYTES_):
             if pyv == 2:
-                try:
-                    # cat not process bytes like b'\xff\xfe'
-                    ctx.obj = ustr(ctx.obj)
-                except:
-                    ctx.obj = ''.join(map(lambda e: '\\x' + e.encode('hex'), ctx.obj))
+                # convert to unicode
+                ctx.obj = ctx.obj.decode(self.config.encoding, 'replace')
+                ctx.obj = self.escape(ctx.obj, typ)
             else:
-                ctx.obj = str(ctx.obj).strip("b'")
+                ctx.obj = repr(ctx.obj)[2:-1]
+        else:
+            sio = StringIO()
+            for char in ctx.obj:
+                if is_printable(char):
+                    char = self.escape(char, typ)
+                    sio.write(char)
+                else:
+                    char = repr(char)[1:-1]
+                    if pyv == 2:
+                        char = char[1:]
+                        char = char.decode(self.config.encoding)
+                    sio.write(char)
+            ctx.obj = sio.getvalue()
+            sio.close()
+            """
+            try:
+                ctx.obj.encode('utf8')
+                ctx.obj = self.escape(ctx.obj, typ)
+            except:
+                ctx.obj = repr(ctx.obj)[1:-1]
+            """
 
-        ctx.obj = self.escape(ustr(ctx.obj), typ)
         if self.do_quote:
             wrapper = StringWrapper(self.config, typ)
         else:

@@ -5,6 +5,7 @@ from __future__ import unicode_literals
 from __future__ import division
 
 import urwid
+import unicodedata
 
 from beeprint import constants as C
 from beeprint import helper
@@ -131,3 +132,58 @@ def break_string(s, width):
         # seg is the type of <type 'str'> in py2
         seg_list = [seg.decode('utf8') for seg in seg_list]
     return seg_list
+
+
+# copy from https://github.com/wolever/pprintpp
+#
+# pprintpp will make an attempt to print as many Unicode characters as is
+# safely possible. It will use the character category along with this table to
+# determine whether or not it is safe to print a character. In this context,
+# "safety" is defined as "the character will appear visually distinct" -
+# combining characters, spaces, and other things which could be visually
+# ambiguous are repr'd, others will be printed. I made this table mostly by
+# hand, mostly guessing, so please file bugs.
+# Source: http://www.unicode.org/reports/tr44/#GC_Values_Table
+unicode_printable_categories = {
+    "Lu": 1, # Uppercase_Letter	an uppercase letter
+    "Ll": 1, # Lowercase_Letter	a lowercase letter
+    "Lt": 1, # Titlecase_Letter	a digraphic character, with first part uppercase
+    "LC": 1, # Cased_Letter	Lu | Ll | Lt
+    "Lm": 0, # Modifier_Letter	a modifier letter
+    "Lo": 1, # Other_Letter	other letters, including syllables and ideographs
+    "L":  1, # Letter	Lu | Ll | Lt | Lm | Lo
+    "Mn": 0, # Nonspacing_Mark	a nonspacing combining mark (zero advance width)
+    "Mc": 0, # Spacing_Mark	a spacing combining mark (positive advance width)
+    "Me": 0, # Enclosing_Mark	an enclosing combining mark
+    "M":  1, # Mark	Mn | Mc | Me
+    "Nd": 1, # Decimal_Number	a decimal digit
+    "Nl": 1, # Letter_Number	a letterlike numeric character
+    "No": 1, # Other_Number	a numeric character of other type
+    "N":  1, # Number	Nd | Nl | No
+    "Pc": 1, # Connector_Punctuation	a connecting punctuation mark, like a tie
+    "Pd": 1, # Dash_Punctuation	a dash or hyphen punctuation mark
+    "Ps": 1, # Open_Punctuation	an opening punctuation mark (of a pair)
+    "Pe": 1, # Close_Punctuation	a closing punctuation mark (of a pair)
+    "Pi": 1, # Initial_Punctuation	an initial quotation mark
+    "Pf": 1, # Final_Punctuation	a final quotation mark
+    "Po": 1, # Other_Punctuation	a punctuation mark of other type
+    "P":  1, # Punctuation	Pc | Pd | Ps | Pe | Pi | Pf | Po
+    "Sm": 1, # Math_Symbol	a symbol of mathematical use
+    "Sc": 1, # Currency_Symbol	a currency sign
+    "Sk": 1, # Modifier_Symbol	a non-letterlike modifier symbol
+    "So": 1, # Other_Symbol	a symbol of other type
+    "S":  1, # Symbol	Sm | Sc | Sk | So
+    "Zs": 0, # Space_Separator	a space character (of various non-zero widths)
+    "Zl": 0, # Line_Separator	U+2028 LINE SEPARATOR only
+    "Zp": 0, # Paragraph_Separator	U+2029 PARAGRAPH SEPARATOR only
+    "Z":  1, # Separator	Zs | Zl | Zp
+    "Cc": 0, # Control	a C0 or C1 control code
+    "Cf": 0, # Format	a format control character
+    "Cs": 0, # Surrogate	a surrogate code point
+    "Co": 0, # Private_Use	a private-use character
+    "Cn": 0, # Unassigned	a reserved unassigned code point or a noncharacter
+    "C":  0, # Other	Cc | Cf | Cs | Co | Cn
+}
+
+def is_printable(char):
+    return unicode_printable_categories.get(unicodedata.category(char))
