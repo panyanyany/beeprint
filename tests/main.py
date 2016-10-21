@@ -8,7 +8,7 @@ import re
 
 CUR_SCRIPT_PATH = os.path.dirname(os.path.abspath(__file__))
 BEEPRINT_PATH = os.path.abspath(os.path.join(CUR_SCRIPT_PATH, '..'))
-sys.path.append(BEEPRINT_PATH)
+sys.path.insert(0, BEEPRINT_PATH)
 
 from beeprint import pyv
 from beeprint import pp
@@ -239,8 +239,10 @@ class TestInlineRepr(TestBase):
         data_path = os.path.join(CUR_SCRIPT_PATH, rel_path)
         with codecs.open(data_path, encoding='utf8') as fp:
             ans = fp.read()
+        ans, _ = re.subn("(len=\d+)", "", ans)
 
         res = df.test_inline_repr_out_of_range(False)
+        res, _ = re.subn("(len=\d+)", "", res)
 
         self.assertEqual(ans, res)
 

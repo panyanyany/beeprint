@@ -15,7 +15,7 @@ import re
 
 CUR_SCRIPT_PATH = os.path.dirname(os.path.abspath(__file__))
 BEEPRINT_PATH = os.path.abspath(os.path.join(CUR_SCRIPT_PATH, '..'))
-sys.path.append(BEEPRINT_PATH)
+sys.path.insert(0, BEEPRINT_PATH)
 
 if sys.version_info < (3, 0):
     # avoid throw [UnicodeEncodeError: 'ascii' codec can't encode characters]
@@ -31,6 +31,7 @@ else:
 from pprintpp import pprint as ppp
 from beeprint import pp, pyv, Config
 from beeprint import constants as C 
+
 
 try:
     from .definition import values
@@ -159,9 +160,9 @@ def main():
         # pp(tweet)
         # df.test_boundary_break()
         # df.test_complicate_data()
-        # df.test_inline_repr_out_of_range()
-        config = Config()
-        config.max_depth = 3
+        df.test_inline_repr_out_of_range()
+        # config = Config()
+        # config.max_depth = 3
         # config.debug_level = 9
         # pp(sys.modules['inspect'].Parameter.KEYWORD_ONLY, config=config)
         # pp(sys.modules['re']._cache)
@@ -177,7 +178,7 @@ def main():
         # ppp(sys.modules['pygments.unistring'].Cs)
         # print(sys.modules['pygments.unistring'].Cs)
 
-        df.test_sort_of_string()
+        # df.test_sort_of_string()
         # ppp(df.sort_of_string)
         # df.test_recursion()
         # df.test_tuple_nested()
