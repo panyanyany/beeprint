@@ -83,3 +83,6 @@ class Config(object):
     # print dict with ordered keys
     dict_ordered_key_enable = True
 
+    # >> output control
+    output_briefly_enable = True
+    output_briefly_method = C._OB_BY_LEVEL

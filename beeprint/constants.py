@@ -40,3 +40,11 @@ _STRING_BREAK_BY_WIDTH = 2
 
 _TEXT_AUTOCLIP_BY_LINE = 1
 # _TEXT_AUTOCLIP_BY_LENGTH = 2
+
+# output briefly
+# print parallel levels that would not run out of view port
+# they're sub levels would be hidden
+_OB_BY_LEVEL = 1
+# print one level and its children levels until it reach the bottom of view port
+# just like echo $obj | less
+_OB_BY_HEIGHT = 2

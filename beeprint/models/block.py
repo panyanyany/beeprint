@@ -246,14 +246,6 @@ class ClassBlock(Block):
             ret = _b(self.config, ret)
 
             for idx, key, val in ele_ctnr:
-                '''
-                '最后一个元素不需要再加(,)逗号'
-                if idx == props_cnt - 1:
-                    position = C._AS_VALUE_
-                else:
-                    position = C._AS_CLASS_ELEMENT_
-                '''
-
                 # '忽略掉 以__开头的成员、自引用成员、函数成员'
                 ctx = self.ctx.clone()
                 ctx.obj = (key, val)
