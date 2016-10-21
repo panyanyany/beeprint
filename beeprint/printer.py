@@ -31,7 +31,7 @@ def pp(o, output=True, max_depth=None, config=None):
     """print data beautifully
     """
 
-    config = config or Config()
+    config = (config and config.clone()) or Config()
     if max_depth:
         config.max_depth = max_depth
 

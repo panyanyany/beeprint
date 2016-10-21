@@ -14,6 +14,12 @@ from . import utils
 
 class Config(object):
 
+    def clone(self):
+        obj = Config()
+        for k,v in self.__dict__.items():
+            setattr(obj, k, v)
+        return obj
+
     # >> coding
     encoding = 'utf-8'
 
