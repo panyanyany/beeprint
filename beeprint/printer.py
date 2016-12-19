@@ -27,13 +27,25 @@ from .config import Config
 from .debug_kit import print_obj_path
 
 
-def pp(o, output=True, max_depth=None, config=None):
+def pp(o, output=True, max_depth=5, indent=2, width=80, sort_keys=True, config=None):
     """print data beautifully
     """
 
-    config = (config and config.clone()) or Config()
-    if max_depth:
+    if config:
+        config = config.clone()
+    else:
+        config = Config()
+
+        assert max_depth > 0
         config.max_depth = max_depth
+
+        assert indent > 0
+        config.indent_char = u' '*indent
+
+        assert width >= 0
+        config.string_break_width = width
+
+        config.dict_ordered_key_enable = bool(sort_keys)
 
     if not output:
         config.stream = None
