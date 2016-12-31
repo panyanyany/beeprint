@@ -36,7 +36,7 @@ class Block(object):
         self.config = config
         self.ctx = ctx
         self.ctx.element_ending = self.get_element_ending()
-        self.ctn = BlockContent(self)
+        self.ctn = BlockModel(self)
 
     def __str__(self):
         return self.build_block()
@@ -788,11 +788,14 @@ class ReprOthersHandlerInlineRepr(ReprOthersHandler):
         return ctx.obj
 
 
-class BlockContent(object):
+class BlockModel(object):
 
     def __init__(self, blk):
         self.blk = blk
         self.str = ''
+
+    def build(self, class_type='', class_name=''):
+        pass
 
     def write(self, s):
         self.str += s
