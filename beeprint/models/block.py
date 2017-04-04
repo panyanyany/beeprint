@@ -36,7 +36,7 @@ class Block(object):
         self.config = config
         self.ctx = ctx
         self.ctx.element_ending = self.get_element_ending()
-        self.ctn = BlockModel(self)
+        self.ctn = BlockContent(self)
 
     def __str__(self):
         return self.build_block()
@@ -788,7 +788,7 @@ class ReprOthersHandlerInlineRepr(ReprOthersHandler):
         return ctx.obj
 
 
-class BlockModel(object):
+class BlockContent(object):
 
     def __init__(self, blk):
         self.blk = blk
@@ -811,3 +811,18 @@ class BlockModel(object):
 
     def count_lines(self):
         return self.str.count('\n')
+
+
+class BigBrother(object):
+    """A leader every block reports to, gets commands from"""
+    indent_cnt = 0
+
+    @staticmethod
+    def report():
+        """report info to hub"""
+        pass
+
+    @staticmethod
+    def register(blk):
+        """register block to hub"""
+        pass

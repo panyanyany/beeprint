@@ -101,9 +101,7 @@ v_line_break_boundary = [
 ]
 
 def test_boundary_break(output=True):
-    config = Config()
-    config.string_break_method = C._STRING_BREAK_BY_WIDTH
-    return pp(v_line_break_boundary, output, config=config)
+    return pp(v_line_break_boundary, output, string_break_method=C._STRING_BREAK_BY_WIDTH)
 
 
 out_of_range = [
@@ -117,9 +115,7 @@ out_of_range = [
 ]
 
 def test_out_of_range(output=True):
-    config = Config()
-    config.max_depth = 1
-    return pp(out_of_range, output, config=config)
+    return pp(out_of_range, output, max_depth=1)
 
 out_of_range_in_dict = {
     'one': inst_of_normal_class_new_style,
@@ -127,9 +123,7 @@ out_of_range_in_dict = {
 }
 
 def test_out_of_range_in_dict(output=True):
-    config = Config()
-    config.max_depth = 1
-    return pp(out_of_range_in_dict, output, config=config)
+    return pp(out_of_range_in_dict, output, max_depth=1)
 
 clip_by_3_lines = [
     'a'*(77*2 - 2),
@@ -164,9 +158,7 @@ dict_multi_keys = {
 
 
 def test_dict_ordered_keys(output=True):
-    config = Config()
-    config.dict_ordered_key_enable = True
-    return pp(dict_multi_keys, output, config=config)
+    return pp(dict_multi_keys, output, dict_ordered_key_enable=True)
 
 
 def test_complicate_data(output=True):
@@ -342,16 +334,13 @@ class_repr = [
     NormalClassNewStyle,
 ]
 def test_class_all_repr_disable(output=True):
-    config = Config()
-    config.instance_repr_enable = False
-    return pp(class_repr, output, config=config)
+    return pp(class_repr, output, instance_repr_enable=False)
 
 def test_class_inst_repr_enable(output=True):
-    config = Config()
     inst_repr = []
     for c in class_repr:
         inst_repr.append(c())
-    return pp(class_repr + inst_repr, output, config=config)
+    return pp(class_repr + inst_repr, output)
 
 
 class RecurTestNormalClass(object):
@@ -382,7 +371,5 @@ def test_recursion(output=True):
         inst_of_recur_normal,
         RecurTestRecurClass,
     ]
-    config = Config()
-    # config.debug_level = 9
-    return pp(recursive_values, output, config=config)
+    return pp(recursive_values, output)
     # return ppp(recursive_values)
