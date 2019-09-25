@@ -147,47 +147,14 @@ def test_class_repr():
         print('%60s %s:%20s %s:%20s' % (c, get_decorators(c.__repr__), typ(c), get_decorators(c().__repr__), typ(c())))
         # print('%60s %20s %-20s' % (c, typ(c), repr(c())))
 
+class A:
+    a =1
+    b =2
+    c= '3333'
 
 def main():
-    if len(sys.argv) == 1:
-        # S.debug_level = 9
-        # S.str_display_not_prefix_u = False
-        # S.str_display_not_prefix_b = False
-
-        # S.max_depth = 1
-        tweet = {'coordinates': None, 'created_at': 'Mon Jun 27 19:32:19 +0000 2011', 'entities': {'hashtags': [], 'urls': [{'display_url': 'tumblr.com/xnr37hf0yz', 'expanded_url': 'http://tumblr.com/xnr37hf0yz', 'indices': [107, 126], 'url': 'http://t.co/cCIWIwg'}], 'user_mentions': []}, 'place': None, 'source': '<a href="http://www.tumblr.com/" rel="nofollow">Tumblr</a>', 'truncated': False, 'user': {'contributors_enabled': True, 'default_profile': False, 'entities': {'hashtags': [], 'urls': [], 'user_mentions': []}, 'favourites_count': 20, 'id_str': '6253282', 'profile_link_color': '0094C2'}}
-        tweet = {'entities': {'hashtags': [], 'urls': [{'display_url': 'tumblr.com/xnr37hf0yz', 'expanded_url': 'http://tumblr.com/xnr37hf0yz', 'indices': [107, 126], 'url': 'http://t.co/cCIWIwg'}], 'user_mentions': []}}
-        # pp(tweet)
-        # df.test_boundary_break()
-        # df.test_complicate_data()
-        df.test_inline_repr_out_of_range()
-        # config = Config()
-        # config.max_depth = 3
-        # config.debug_level = 9
-        # pp(sys.modules['inspect'].Parameter.KEYWORD_ONLY, config=config)
-        # pp(sys.modules['re']._cache)
-        # pp(sys.modules, config=config)
-        # df.test_class_last_el()
-        # df.test_inner_class()
-        # df.test_autoclip_no_room()
-        # df.test_class_all_repr_disable()
-        # df.test_class_inst_repr_enable()
-
-        # import pygments.unistring
-        # pp(sys.modules['pygments.unistring'].Cs)
-        # ppp(sys.modules['pygments.unistring'].Cs)
-        # print(sys.modules['pygments.unistring'].Cs)
-
-        # df.test_sort_of_string()
-        # ppp(df.sort_of_string)
-        # df.test_recursion()
-        # df.test_tuple_nested()
-
-        return
-
-    for i in range(1, len(sys.argv)):
-        fn = sys.argv[i]
-        args[fn]()
+    a = A()
+    pp(a)
 
 if __name__ == '__main__':
     main()

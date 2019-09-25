@@ -27,7 +27,7 @@ from .config import Config
 from .debug_kit import print_obj_path
 
 
-def pp(o, output=True, max_depth=5, indent=2, width=80, sort_keys=True, config=None, **kwargs):
+def pp(o, output=True, max_depth=5, indent=2, width=80, sort_keys=True, string_break_enable=True, config=None, **kwargs):
     """print data beautifully
     """
 
@@ -45,6 +45,10 @@ def pp(o, output=True, max_depth=5, indent=2, width=80, sort_keys=True, config=N
         assert width >= 0
         config.string_break_width = width
 
+        if string_break_enable is False:
+            config.string_break_enable = False
+            config.string_break_method = C._STRING_BREAK_BY_NONE
+
         config.dict_ordered_key_enable = bool(sort_keys)
         for k, v in kwargs.items():
             if getattr(config, k):
@@ -56,7 +60,10 @@ def pp(o, output=True, max_depth=5, indent=2, width=80, sort_keys=True, config=N
     try:
         res = str(Block(config, Context(obj=o)))
     except:
-        print_obj_path()
+        try:
+            print_obj_path()
+        except:
+            pass
         raise
     if config.debug_level != 0:
         if config.debug_delay:
