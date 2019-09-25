@@ -211,6 +211,15 @@ class TestDict(TestBase):
 
         self.assertEqual(ans, res)
 
+    def test_comma_ending(self):
+        rel_path = 'data/dict/comma.txt'
+        data_path = os.path.join(CUR_SCRIPT_PATH, rel_path)
+        with codecs.open(data_path, encoding='utf8') as fp:
+            ans = fp.read()
+
+        res = pp({'key': 'aaa,,,'}, output=False)
+        self.assertEqual(ans, res)
+
 
 class TestTuple(TestBase):
 

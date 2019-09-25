@@ -27,7 +27,10 @@ from .config import Config
 from .debug_kit import print_obj_path
 
 
-def pp(o, output=True, max_depth=5, indent=2, width=80, sort_keys=True, string_break_enable=True, config=None, **kwargs):
+def pp(o, output=True, max_depth=5, indent=2, width=80, sort_keys=True, string_break_enable=True,
+       hide_attr_by_prefixes=Config.prop_leading_filters,
+       config=None,
+       **kwargs):
     """print data beautifully
     """
 
@@ -40,10 +43,12 @@ def pp(o, output=True, max_depth=5, indent=2, width=80, sort_keys=True, string_b
         config.max_depth = max_depth
 
         assert indent > 0
-        config.indent_char = u' '*indent
+        config.indent_char = u' ' * indent
 
         assert width >= 0
         config.string_break_width = width
+
+        config.prop_leading_filters = hide_attr_by_prefixes
 
         if string_break_enable is False:
             config.string_break_enable = False

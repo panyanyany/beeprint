@@ -14,14 +14,14 @@ from beeprint import helper
 from beeprint import constants as C
 from beeprint.config import Config
 from beeprint.debug_kit import debug
-from beeprint.utils import (is_newline_obj, is_class_instance, pyv, 
+from beeprint.utils import (is_newline_obj, is_class_instance, pyv,
                             _unicode, get_name, get_type, has_custom_repr,
                             is_base_type)
-from beeprint.helper import (object_attr_default_filter, dict_key_filter, 
+from beeprint.helper import (object_attr_default_filter, dict_key_filter,
                              ustr, is_extendable)
 from beeprint.lib import search_up_tree as sut
 from beeprint.lib import position_dict
-from beeprint.helpers.string import (break_string, 
+from beeprint.helpers.string import (break_string,
                                      calc_width, calc_left_margin,
                                      too_long, shrink_inner_string,
                                      get_line_width, is_printable)
@@ -82,7 +82,7 @@ class Block(object):
         return tail
 
     def get_elements(self):
-        raise Exception("%s does not implement this method" % 
+        raise Exception("%s does not implement this method" %
                         self.__class__)
 
     def build_block(self):
@@ -92,7 +92,7 @@ class Block(object):
         obj = self.ctx.obj
         position = self.ctx.position
 
-        debug(self.config, C._DL_FUNC_, 
+        debug(self.config, C._DL_FUNC_,
               indent_cnt,
               ('obj:{} indent_cnt:{} position:{:b}'.format(
                   obj, indent_cnt, position)))
@@ -101,7 +101,7 @@ class Block(object):
 
         tail = self.ctx.element_ending
         block_ending = self.get_block_ending()
-        debug(self.config, C._DL_STATEMENT, 
+        debug(self.config, C._DL_STATEMENT,
               indent_cnt, 'tail, block_ending: ' + str([tail, block_ending]))
 
         # recursive check
@@ -129,7 +129,7 @@ class Block(object):
                 ret = ustr(" ")
 
             rb = ReprBlock(self.config, self.ctx, handlers=[
-                ReprStringHandlerInlineRepr(self.config), 
+                ReprStringHandlerInlineRepr(self.config),
                 ReprOthersHandlerInlineRepr(self.config)])
             ret += str(rb) + tail + '\n'
             return self.ctn.write(ret)
@@ -149,7 +149,7 @@ class Block(object):
         else:
             debug(self.config, C._DL_STATEMENT, indent_cnt, 'is simple type')
             rb = ReprBlock(self.config, self.ctx, handlers=[
-                ReprStringHandlerMultiLiner(self.config), 
+                ReprStringHandlerMultiLiner(self.config),
                 ReprOthersHandler(self.config)])
             ret += self.ctn.write(indent_cnt * self.config.indent_char + str(rb) + ustr(tail + '\n'))
 
@@ -215,7 +215,7 @@ class ClassBlock(Block):
 
         tail = self.ctx.element_ending
         block_ending = self.get_block_ending()
-        debug(self.config, C._DL_STATEMENT, 
+        debug(self.config, C._DL_STATEMENT,
               indent_cnt, 'tail, block_ending: ' + str([tail, block_ending]))
 
         # {
@@ -229,7 +229,7 @@ class ClassBlock(Block):
         label = get_type(o)
 
         ret = _leading
-        if (self.config.instance_repr_enable and 
+        if (self.config.instance_repr_enable and
                 is_class_instance(self.ctx.obj) and
                 has_custom_repr(self.ctx.obj)):
             ret = self.ctn.write(ret + ustr(repr(self.ctx.obj)))
@@ -333,16 +333,16 @@ class ListBlock(Block):
 
         tail = self.ctx.element_ending
         block_ending = self.get_block_ending()
-        debug(self.config, 
-              C._DL_FUNC_, 
+        debug(self.config,
+              C._DL_FUNC_,
               indent_cnt, 'tail, block_ending: ' + str([tail, block_ending]))
 
         '所有元素显示在同一行'
         if self.config.list_in_line:
             _f = map(
-                lambda e: (not (is_extendable(e) or 
-                                too_long(self.config.indent_char, 
-                                         indent_cnt, position, repr_block(e, self.config)))), 
+                lambda e: (not (is_extendable(e) or
+                                too_long(self.config.indent_char,
+                                         indent_cnt, position, repr_block(e, self.config)))),
                 o)
             if all(_f):
                 _o = map(lambda e: repr_block(e, self.config), o)
@@ -392,7 +392,7 @@ class TupleBlock(Block):
         o = self.ctx.obj
         position = self.ctx.position
 
-        debug(self.config, C._DL_FUNC_, 
+        debug(self.config, C._DL_FUNC_,
               indent_cnt,
               ('obj:{} indent_cnt:{} position:{:b}'.format(
                   o, indent_cnt, position)))
@@ -469,7 +469,7 @@ class PairBlock(Block):
 
         tail = self.ctx.element_ending
         block_ending = self.get_block_ending(val)
-        debug(self.config, C._DL_STATEMENT, 
+        debug(self.config, C._DL_STATEMENT,
               indent_cnt, 'tail, block_ending: ' + str([tail, block_ending]))
 
         key = self.ctx.key_expr
@@ -505,13 +505,13 @@ class PairBlock(Block):
             ctx.obj = val
             if self.config.max_depth <= indent_cnt:
                 # reach max_depth, just show brief message
-                rb = ReprBlock(self.config, ctx, 
-                               handlers=[ReprStringHandlerInlineRepr(self.config), 
+                rb = ReprBlock(self.config, ctx,
+                               handlers=[ReprStringHandlerInlineRepr(self.config),
                                          ReprOthersHandlerInlineRepr(self.config)])
                 ret += self.ctn.write(ustr(" " + str(rb) + tail + block_ending))
             else:
-                rb = ReprBlock(self.config, ctx, 
-                               handlers=[ReprStringHandlerMultiLiner(self.config), 
+                rb = ReprBlock(self.config, ctx,
+                               handlers=[ReprStringHandlerMultiLiner(self.config),
                                          ReprOthersHandler(self.config)])
                 ret += self.ctn.write(ustr(" ") + str(rb) + ustr(tail + block_ending))
 
@@ -581,7 +581,7 @@ class ReprBlock(Block):
         self.config = config
         self.ctx = ctx
         self.handlers = handlers or [
-            ReprStringHandler(self.config), 
+            ReprStringHandler(self.config),
             ReprOthersHandler(self.config)]
         self.typ = ReprBlock.ReprType(ctx.obj)
 
@@ -596,13 +596,13 @@ class ReprBlock(Block):
 
         def __init__(self, config):
             self.config = config
-        
+
         def accept(self, typ):
             raise Exception("Unimplement method")
 
         def __call__(self, ctx, typ):
             raise Exception("Unimplement method")
-    
+
     class ReprType(object):
 
         _LITERAL_ = 1 # string literal depends on script's coding
@@ -714,7 +714,7 @@ class ReprStringHandler(ReprBlock.Handler):
 
 class ReprStringHandlerMultiLiner(ReprStringHandler):
 
-    def rearrenge(self, ctx, typ, wrapper):
+    def rearrenge(self, ctx: Context, typ, wrapper):
         assert ctx.element_ending is not None, "element_ending must be set"
 
         left_margin = calc_left_margin(ctx, wrapper)
@@ -724,17 +724,21 @@ class ReprStringHandlerMultiLiner(ReprStringHandler):
 
         if a_width > 0:
             seg_list = break_string(
-                ctx.obj + 
-                wrapper.rqm + 
-                ctx.element_ending, 
+                ctx.obj +
+                wrapper.rqm +
+                ctx.element_ending,
                 a_width)
 
-            seg_list[-1] = seg_list[-1].rstrip(
-                wrapper.rqm + 
-                ctx.element_ending,
-            )
+            # seg_list[-1] = seg_list[-1].rstrip(
+            #     wrapper.rqm +
+            #     ctx.element_ending,
+            # )
+            # remove rqm + element_ending added by last block
+            rqm_ending_len = len(wrapper.rqm)+len(ctx.element_ending)
+            if seg_list[-1][-1*rqm_ending_len:] == wrapper.rqm + ctx.element_ending:
+                seg_list[-1] = seg_list[-1][:-1*rqm_ending_len]
             indent_char_width = calc_width(self.config.indent_char)
-            left_margin_chars = (left_margin // indent_char_width * self.config.indent_char + 
+            left_margin_chars = (left_margin // indent_char_width * self.config.indent_char +
                                  left_margin % indent_char_width * ' ')
             for i in range(1, len(seg_list)):
                 seg_list[i] = ''.join([
@@ -742,7 +746,7 @@ class ReprStringHandlerMultiLiner(ReprStringHandler):
                     seg_list[i],
                 ])
 
-            if (self.config.text_autoclip_enable and 
+            if (self.config.text_autoclip_enable and
                     self.config.text_autoclip_method == C._TEXT_AUTOCLIP_BY_LINE):
                 lines_cnt = len(seg_list)
                 if lines_cnt > self.config.text_autoclip_maxline:
@@ -768,7 +772,7 @@ class ReprStringHandlerInlineRepr(ReprStringHandler):
     """repr string object in one line"""
 
     def rearrenge(self, ctx, typ, wrapper):
-        shrink_inner_string(ctx, 
+        shrink_inner_string(ctx,
                             self.config.string_break_method,
                             self.config.string_break_width,
                             wrapper)
@@ -777,10 +781,10 @@ class ReprStringHandlerInlineRepr(ReprStringHandler):
 
 class ReprOthersHandlerInlineRepr(ReprOthersHandler):
     """repr non-string object in one line"""
-    
+
     def __call__(self, ctx, typ):
         ctx.obj = ustr(repr(ctx.obj))
-        shrink_inner_string(ctx, 
+        shrink_inner_string(ctx,
                             self.config.string_break_method,
                             self.config.string_break_width,
                             None)
