@@ -714,7 +714,7 @@ class ReprStringHandler(ReprBlock.Handler):
 
 class ReprStringHandlerMultiLiner(ReprStringHandler):
 
-    def rearrenge(self, ctx: Context, typ, wrapper):
+    def rearrenge(self, ctx, typ, wrapper):
         assert ctx.element_ending is not None, "element_ending must be set"
 
         left_margin = calc_left_margin(ctx, wrapper)
