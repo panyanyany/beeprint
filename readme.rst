@@ -146,3 +146,7 @@ Settings
 ========
 
     more on `config.py <./beeprint/config.py>`__
+
+Others
+======
+`MySQLDesk <https://mysqldesk.com>`_
