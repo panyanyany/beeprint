@@ -2,7 +2,7 @@ from setuptools import setup
 setup(
     name = 'beeprint',
     packages = ['beeprint', 'beeprint.models', 'beeprint.helpers', 'beeprint.lib'], # this must be the same as the name above
-    version = '2.4.10',
+    version = '2.4.11',
     description = 'make your debug printing more friendly',
     author = 'Yangyang Pan',
     author_email = '568397440@qq.com',
@@ -11,7 +11,7 @@ setup(
     keywords = ['print', 'pprint', 'format', 'debug'], # arbitrary keywords
     classifiers = [
         "Programming Language :: Python",
-        "Programming Language :: Python :: 2",
+        # "Programming Language :: Python :: 2",
         "Programming Language :: Python :: 3",
         "License :: OSI Approved :: BSD License",
         "Operating System :: OS Independent",

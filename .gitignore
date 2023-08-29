@@ -4,3 +4,4 @@ __pycache__/
 beeprint.egg-info/*
 build/*
 dist/*
+py310/

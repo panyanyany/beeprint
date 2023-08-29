@@ -12,6 +12,8 @@ register:
 	python setup.py register -r pypitest || true
 
 full:
+	# TypeError: Retry.__init__() got an unexpected keyword argument 'method_whitelist'
+	# solved: pip install 'urllib3<2'
 	python setup.py sdist
 	twine upload dist/*
 	# python2.7 setup.py bdist_egg upload

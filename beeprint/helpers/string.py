@@ -14,6 +14,8 @@ from beeprint.terminal_size import get_terminal_size
 
 
 def calc_width(s):
+    if hasattr(urwid, 'util'):
+        return urwid.util.calc_width(s, 0, len(s))
     return urwid.str_util.calc_width(s, 0, len(s))
 
 
