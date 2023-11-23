@@ -132,7 +132,7 @@ def break_string(s, width):
     if pyv == 3:
         # seg is the type of <class 'bytes'> in py3
         # seg is the type of <type 'str'> in py2
-        seg_list = [seg.decode('utf8') for seg in seg_list]
+        seg_list = [seg.decode('utf8', 'backslashreplace') for seg in seg_list]
     return seg_list
 
 
